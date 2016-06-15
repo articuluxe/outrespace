@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-15 07:55:42 dharms>
+;; Modified Time-stamp: <2016-06-15 07:57:35 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -73,23 +73,45 @@
   (save-excursion
     (widen)
     (let ((lst '()) beg curr cont parent)
-    (goto-char (point-min))
-    (while (setq beg (outre--find-ns-next))
-      (setq cont
-            (if (and
-                 beg
-                 (setq
-                  parent
-                  (catch 'found
-                    (seq-doseq
-                        (elt lst)
-                      (if (outre--get-distance-from-begin beg elt)
-                          (throw 'found elt) nil)))))
-                (cadr (outre--get-ns-names parent))
-              nil))
-      (setq curr (outre-parse-namespace beg cont))
-      (setq lst (cons curr lst)))
-    lst)))
+      (goto-char (point-min))
+      (while (setq beg (outre--find-ns-next))
+        (setq cont
+              (if (and
+                   beg
+                   (setq
+                    parent
+                    (catch 'found
+                      (seq-doseq
+                          (elt lst)
+                        (if (outre--get-distance-from-begin beg elt)
+                            (throw 'found elt) nil)))))
+                  (cadr (outre--get-ns-names parent))
+                nil))
+        (setq curr (outre-parse-namespace beg cont))
+        (if (outre--namespace-nested-p curr)
+            (let* ((name-pos (outre--get-ns-name-pos curr))
+                   (posb (car name-pos))
+                   (pose (cadr name-pos)))
+              (mapc
+               (lambda (elt)
+                 (setq lst
+                       (cons
+                        (list
+                         (list (car elt)
+                               (setq cont
+                                     (if cont
+                                         (concat cont "::" (car elt))
+                                       (car elt))))
+                         (outre--get-ns-tag-pos curr)
+                         (list
+                          (+ posb (cdr elt))
+                          (+ posb (cdr elt) (length (car elt))))
+                         (outre--get-ns-delimiter-pos curr))
+                        lst)))
+               (outre--flatten-nested-names
+                (buffer-substring-no-properties posb pose))))
+          (setq lst (cons curr lst))))
+      lst)))
 
 (defun outre-scan-buffer ()
   "Scan current buffer for all namespaces.
@@ -163,6 +185,31 @@ Store in result `outre-list'."
 (defun outre--at-ns-begin-p (loc)
   "Evaluate whether point is at the beginning of a namespace."
   (looking-at "namespace"))
+
+(defun outre--namespace-nested-p (ns)
+  "Return whether the namespace NS is a nested namespace (C++17)."
+  (string-match-p "::" (car (outre--get-ns-names ns))))
+
+(defun outre--flatten-nested-names (tags)
+  "Flatten the input TAGS into a list of nested tags.
+Useful for C++17's nested namespaces.  The result is a list of
+cons cells, each of which is of the form: `(tag . pos)', where
+tag is the individual tag, and pos is its position in the input.
+The resultant list may have only one element."
+  (let ((pos 0)
+        (res '())
+        next)
+    (while (setq next (string-match-p "::" tags pos))
+      (setq res (cons
+                 (cons (substring tags pos next) pos)
+                 res))
+      (setq pos (+ 2 next)))
+    ;; add on the final tag
+    (when (substring tags pos)
+      (setq res (cons
+                 (cons
+                  (substring tags pos) pos) res)))
+    (nreverse res)))
 
 (defun outre--get-ns-names (ns)
   "Return the list '(name full-name) of NS."
@@ -243,12 +290,11 @@ If POS is before or after the namespace bounds, return nil."
          (ns (and beg (outre-parse-namespace beg))))
     (and ns (outre--get-distance-from-begin pt ns) ns)))
 
-(defun outre-jump-to-ns (name)
+(defun outre-jump-to-ns (ns)
   "Jump to the beginning of namespace NAME."
   (interactive)
-  (let ((ns (outre--find-ns-by-name name)))
-    (if ns
-        (outre--on-namespace-selected ns))))
+  (when ns
+    (outre--on-namespace-selected ns)))
 
 (defun outre--find-ns-by-name (name)
   "Return the namespace matching NAME."
@@ -266,20 +312,20 @@ If POS is before or after the namespace bounds, return nil."
               outre-list))
         name)
     (setq name
-          (ivy-read "Namespace: " lst
+          (ivy-read "Namespace: " (nreverse lst)
                     :re-builder #'ivy--regex
                     :sort nil
                     :initial-input nil))
     (when name
       (outre-jump-to-ns (outre--find-ns-by-name name))
-      (message "Jumped to namespace %s" name))))
+      (message "Jumped to namespace %s" name)
+      )))
 
 ;; namespace
+(defvar c-basic-offset)
 (defun outre-wrap-namespace-region (start end name)
   "Insert enclosing namespace brackets around a region."
   (interactive "r\nsEnter the namespace name (leave blank for anonymous): ")
-  ;; (let ((name))
-  ;;   (setq name (read-string "Enter the namespace name: "))
     (save-excursion
       (goto-char end) (insert "\n}")
       (insert-char ?\s c-basic-offset)
