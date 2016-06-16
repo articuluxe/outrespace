@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-15 07:57:35 dharms>
+;; Modified Time-stamp: <2016-06-16 07:52:53 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -117,7 +117,10 @@
   "Scan current buffer for all namespaces.
 Store in result `outre-list'."
   (interactive)
-  (setq outre-list (outre--scan-all-ns)))
+  (let ((start (current-time)))
+    (setq outre-list (outre--scan-all-ns))
+    (message "It took %.3f to scan buffer's namespaces"
+             (float-time (time-subtract (current-time) start)))))
 
 ;;;###autoload
 (defun outre-goto-namespace-next ()
@@ -227,10 +230,9 @@ The resultant list may have only one element."
   "Return the list '(beg end) of the scope {} of NS."
   (nth 3 ns))
 
-;;;###autoload
 (defun outre-parse-namespace (loc &optional parent)
-  "Parse the namespace starting at LOC."
-  (interactive)
+  "Parse the namespace starting at LOC.
+PARENT contains any enclosing namespaces."
   (save-excursion
     (let (tag-pos name-pos delimiter-pos title beg end)
       (goto-char loc)
@@ -285,10 +287,32 @@ If POS is before or after the namespace bounds, return nil."
 
 (defun outre--find-enclosing-ns ()
   "Return the namespace around point, if any."
-  (let* ((pt (point))
-         (beg (outre--find-ns-previous))
-         (ns (and beg (outre-parse-namespace beg))))
-    (and ns (outre--get-distance-from-begin pt ns) ns)))
+  (save-excursion
+    (let* ((pt (point))
+           (beg (outre--find-ns-previous))
+           (ns (and beg (outre-parse-namespace beg))))
+      (and ns (outre--get-distance-from-begin pt ns) ns))))
+
+(defun outre-change-enclosing-ns-name ()
+  "Change the name of the enclosing namespace, if one exists."
+  (interactive)
+  (let ((ns (outre--find-enclosing-ns))
+        start end name)
+    (if ns
+        (progn
+          (setq name
+                (read-string
+                 (concat "Change namespace "
+                         (car (outre--get-ns-names ns))
+                         " to: ")))
+          (setq start (car (outre--get-ns-name-pos ns)))
+          (setq end (cadr (outre--get-ns-name-pos ns)))
+          (delete-region start end)
+          (goto-char start)
+          (insert name)
+          ;; todo: change comment after ending delimiter
+          )
+      (message "No enclosing namespace"))))
 
 (defun outre-jump-to-ns (ns)
   "Jump to the beginning of namespace NAME."
