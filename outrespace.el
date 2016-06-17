@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-16 07:52:53 dharms>
+;; Modified Time-stamp: <2016-06-17 17:10:52 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -56,16 +56,16 @@
 (defun outre--on-namespace-selected (ns)
   "Select a namespace."
   (let ((name (outre--get-ns-name-pos ns))
-        beg end ov)
+        beg end str ov)
     (outre--move-point-to-ns ns)
-    (if name
-        (progn
-          (setq beg (car name))
-          (setq end (cadr name))
-          (setq ov (make-overlay beg end))
-          (overlay-put ov 'face 'outre-highlight-face)
-          (sit-for 1)
-          (delete-overlay ov)))
+    (setq beg (car name))
+    (setq end (cadr name))
+    (setq str (buffer-substring-no-properties beg end))
+    (when str
+      (setq ov (make-overlay beg end))
+      (overlay-put ov 'face 'outre-highlight-face)
+      (sit-for 1)
+      (delete-overlay ov))
     ))
 
 (defun outre--scan-all-ns ()
@@ -238,22 +238,27 @@ PARENT contains any enclosing namespaces."
       (goto-char loc)
       (unless (outre--at-ns-begin-p loc)
         (error "not looking at valid namespace"))
+      ;; get bounds of namespace tag
       (setq beg (point))
       (forward-sexp)
       (setq end (point))
       (setq tag-pos (list beg end))
-      (unless (search-forward-regexp "\\s-+\\(.+?\\)\\s-+\\({\\)" nil t)
+      (unless (search-forward-regexp "\\s-+\\(?:\\(.+\\)\\s-+\\)?\\({\\)" nil t)
         (error "error parsing namespace"))
-      (setq title (match-string-no-properties 1))
-      (when title
-        (setq name-pos (list (match-beginning 1) (match-end 1))))
-      (unless (match-string 2)
-        (error "error parsing namespace \"{\""))
+      ;; get bounds of opening delimiter `{'
       (goto-char (match-beginning 2))
       (setq beg (point))
       (forward-list)
       (setq end (point))
       (setq delimiter-pos (list beg end))
+      ;; get bounds of name, if any exists
+      (setq title (match-string-no-properties 1)) ;may have whitespace
+      (setq beg (match-beginning 1))
+      (setq end (match-end 1))
+      (if (and title (string-trim title)) ;string-trim alters match-data
+          (setq name-pos (list beg end))
+        (setq name-pos (list (1+ (car tag-pos)) (1+ (car tag-pos))))
+        (setq title "<anon>"))
       (list (list title (if parent
                             (concat parent "::" title)
                           title))
