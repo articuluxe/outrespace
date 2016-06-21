@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-17 17:10:52 dharms>
+;; Modified Time-stamp: <2016-06-21 08:22:27 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -39,6 +39,9 @@
   '((t (:foreground "wheat" :background "cadetblue4" :bold t)))
   "Font lock mode face used to highlight namespace names."
   :group 'outrespace-mode)
+
+(defvar outre-anon-name "<anon>"
+  "A display name for anonymous namespaces.")
 
 (defun outre-in-comment-or-string ()
   "Return t if point is within a comment or string."
@@ -257,8 +260,8 @@ PARENT contains any enclosing namespaces."
       (setq end (match-end 1))
       (if (and title (string-trim title)) ;string-trim alters match-data
           (setq name-pos (list beg end))
-        (setq name-pos (list (1+ (car tag-pos)) (1+ (car tag-pos))))
-        (setq title "<anon>"))
+        (setq name-pos (list (1+ (cadr tag-pos)) (1+ (cadr tag-pos))))
+        (setq title outre-anon-name))
       (list (list title (if parent
                             (concat parent "::" title)
                           title))
@@ -293,29 +296,46 @@ If POS is before or after the namespace bounds, return nil."
 (defun outre--find-enclosing-ns ()
   "Return the namespace around point, if any."
   (save-excursion
-    (let* ((pt (point))
-           (beg (outre--find-ns-previous))
-           (ns (and beg (outre-parse-namespace beg))))
-      (and ns (outre--get-distance-from-begin pt ns) ns))))
+    (catch 'found
+      (let* ((pt (point))
+             (beg (outre--find-ns-previous))
+             (ns (and beg (outre-parse-namespace beg))))
+        (while ns
+          (when (outre--get-distance-from-begin pt ns)
+            (throw 'found ns))
+          (setq beg (outre--find-ns-previous))
+          (setq ns (and beg (outre-parse-namespace beg))))))))
 
 (defun outre-change-enclosing-ns-name ()
   "Change the name of the enclosing namespace, if one exists."
   (interactive)
+  (outre-scan-buffer)
   (let ((ns (outre--find-enclosing-ns))
-        start end name)
+        start end old new)
     (if ns
         (progn
-          (setq name
-                (read-string
-                 (concat "Change namespace "
-                         (car (outre--get-ns-names ns))
-                         " to: ")))
           (setq start (car (outre--get-ns-name-pos ns)))
           (setq end (cadr (outre--get-ns-name-pos ns)))
+          (setq old (car (outre--get-ns-names ns)))
+          (when (string-equal old outre-anon-name)
+            (setq old "anonymous"))
+          (setq new
+                (read-string
+                 (concat "Change namespace " old
+                         " to (leave blank for anonymous): ")))
+          (save-excursion
+            ;; change any comment with old name at ns end
+            ;; (only look on same line as last delimiter)
+            (goto-char (cadr (outre--get-ns-delimiter-pos ns)))
+            (when (search-forward old (line-end-position) t)
+              (if (string-blank-p new)
+                  (replace-match "anonymous")
+                (replace-match new))))
+          ;; change the namespace tag
           (delete-region start end)
           (goto-char start)
-          (insert name)
-          ;; todo: change comment after ending delimiter
+          (insert new)
+          (just-one-space)
           )
       (message "No enclosing namespace"))))
 
@@ -353,18 +373,18 @@ If POS is before or after the namespace bounds, return nil."
 ;; namespace
 (defvar c-basic-offset)
 (defun outre-wrap-namespace-region (start end name)
-  "Insert enclosing namespace brackets around a region."
+  "Surround the region (START, END) with a namespace NAME."
   (interactive "r\nsEnter the namespace name (leave blank for anonymous): ")
     (save-excursion
       (goto-char end) (insert "\n}")
       (insert-char ?\s c-basic-offset)
-      (insert "// end ")
-      (if (zerop (length name))
-          (insert "anonymous "))
-      (insert "namespace " name "\n")
+      (insert "// end namespace "
+              (if (zerop (length name))
+                  "anonymous" name)
+              "\n")
       (goto-char start)
       (insert "namespace ")
-      (if (not (zerop (length name)))
+      (unless (zerop (length name))
           (insert name " "))
       (insert "{\n\n")))
 
