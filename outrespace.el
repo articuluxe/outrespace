@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-21 08:22:27 dharms>
+;; Modified Time-stamp: <2016-06-21 17:47:50 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -310,42 +310,42 @@ If POS is before or after the namespace bounds, return nil."
   "Change the name of the enclosing namespace, if one exists."
   (interactive)
   (outre-scan-buffer)
-  (let ((ns (outre--find-enclosing-ns))
-        start end old new)
+  (let ((ns (outre--find-enclosing-ns)))
     (if ns
-        (progn
-          (setq start (car (outre--get-ns-name-pos ns)))
-          (setq end (cadr (outre--get-ns-name-pos ns)))
-          (setq old (car (outre--get-ns-names ns)))
-          (when (string-equal old outre-anon-name)
-            (setq old "anonymous"))
-          (setq new
-                (read-string
-                 (concat "Change namespace " old
-                         " to (leave blank for anonymous): ")))
-          (save-excursion
-            ;; change any comment with old name at ns end
-            ;; (only look on same line as last delimiter)
-            (goto-char (cadr (outre--get-ns-delimiter-pos ns)))
-            (when (search-forward old (line-end-position) t)
-              (if (string-blank-p new)
-                  (replace-match "anonymous")
-                (replace-match new))))
-          ;; change the namespace tag
-          (delete-region start end)
-          (goto-char start)
-          (insert new)
-          (just-one-space)
-          )
+        (outre--change-ns-name ns)
       (message "No enclosing namespace"))))
 
-(defun outre-jump-to-ns (ns)
+(defun outre--change-ns-name (ns)
+  "Change the name of namespace denoted by NS to NEW."
+  (let ((start (car (outre--get-ns-name-pos ns)))
+        (end (cadr (outre--get-ns-name-pos ns)))
+        (old (car (outre--get-ns-names ns)))
+        new)
+    (setq new (read-string
+               (concat "Change namespace " old
+                       " to (leave blank for anonymous): ")))
+    (when (string-equal old outre-anon-name)
+      (setq old "anonymous"))
+    (save-excursion
+      ;; change any comment with old name at ns end
+      ;; (only look on same line as last delimiter)
+      (goto-char (cadr (outre--get-ns-delimiter-pos ns)))
+      (when (search-forward old (line-end-position) t)
+        (if (string-blank-p new)
+            (replace-match "anonymous")
+          (replace-match new))))
+    ;; change the namespace tag
+    (delete-region start end)
+    (goto-char start)
+    (insert new)
+    (just-one-space)))
+
+(defun outre--jump-to-ns (ns)
   "Jump to the beginning of namespace NAME."
-  (interactive)
   (when ns
     (outre--on-namespace-selected ns)))
 
-(defun outre--find-ns-by-name (name)
+(defun outre--get-ns-by-name (name)
   "Return the namespace matching NAME."
   (seq-find (lambda(elt)
               (string-equal name (cadr (outre--get-ns-names elt))))
@@ -354,21 +354,38 @@ If POS is before or after the namespace bounds, return nil."
 (defun outre-ivy-jump-to-ns ()
   "Jump to a namespace in current buffer, using ivy to select."
   (interactive)
+  (let ((name (outre--choose-ns-name-with-ivy)))
+    (when name
+      (outre--jump-to-ns (outre--get-ns-by-name name)))))
+
+(defun outre-change-ns-name ()
+  "Select a namespace, then change its name."
+  (interactive)
+  (outre-scan-buffer)
+  (let ((name (outre--choose-ns-name-with-ivy)))
+    (when name
+      (outre--change-ns-name (outre--get-ns-by-name name)))))
+
+(defun outre-print-enclosing-ns-name ()
+  "Print the closest namespace surrounding point, if any."
+  (interactive)
+  (outre-scan-buffer)
+  (let ((ns (outre--find-enclosing-ns)))
+    (when ns
+      (message "Namespace: %s" (car (outre--get-ns-names ns))))))
+
+(defun outre--choose-ns-name-with-ivy ()
+  "Use ivy to select a namespace in the current buffer."
   (outre-scan-buffer)
   (let ((lst (mapcar
               (lambda(elt)
                 (cadr (outre--get-ns-names elt)))
               outre-list))
         name)
-    (setq name
-          (ivy-read "Namespace: " (nreverse lst)
-                    :re-builder #'ivy--regex
-                    :sort nil
-                    :initial-input nil))
-    (when name
-      (outre-jump-to-ns (outre--find-ns-by-name name))
-      (message "Jumped to namespace %s" name)
-      )))
+    (ivy-read "Namespace: " (nreverse lst)
+              :re-builder #'ivy--regex
+              :sort nil
+              :initial-input nil)))
 
 ;; namespace
 (defvar c-basic-offset)
