@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-21 17:47:50 dharms>
+;; Modified Time-stamp: <2016-06-23 08:19:51 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -246,7 +246,7 @@ PARENT contains any enclosing namespaces."
       (forward-sexp)
       (setq end (point))
       (setq tag-pos (list beg end))
-      (unless (search-forward-regexp "\\s-+\\(?:\\(.+\\)\\s-+\\)?\\({\\)" nil t)
+      (unless (search-forward-regexp "\\s-+\\(?:\\(\\sw+\\|\\s.+\\)\\s-+\\)?\\({\\)" nil t)
         (error "error parsing namespace"))
       ;; get bounds of opening delimiter `{'
       (goto-char (match-beginning 2))
@@ -340,6 +340,36 @@ If POS is before or after the namespace bounds, return nil."
     (insert new)
     (just-one-space)))
 
+(defun outre-delete-enclosing-ns ()
+  "Delete the enclosing namespace, if one exists.
+This removes the tags and delimiters, not the content."
+  (interactive)
+  (outre-scan-buffer)
+  (let ((ns (outre--find-enclosing-ns)))
+    (if ns
+        (outre--delete-ns ns)
+      (message "No enclosing namespace"))))
+
+(defun outre--delete-ns (ns)
+  "Delete the namespace denoted by NS (though not its content)."
+  (when ns
+    (save-excursion
+      (let ((start (car (outre--get-ns-tag-pos ns)))
+            (end (car (outre--get-ns-delimiter-pos ns)))
+            (coda (cadr (outre--get-ns-delimiter-pos ns))))
+        (goto-char coda)
+        (delete-char -1)
+        (comment-kill 1)
+        (outre--clean-up-ws-around-point)
+        (delete-region start (1+ end))
+        (goto-char start)
+        (outre--clean-up-ws-around-point)))))
+
+(defun outre--clean-up-ws-around-point ()
+  "Clean up whitespace around point."
+  (just-one-space)
+  (delete-blank-lines))
+
 (defun outre--jump-to-ns (ns)
   "Jump to the beginning of namespace NAME."
   (when ns
@@ -354,7 +384,7 @@ If POS is before or after the namespace bounds, return nil."
 (defun outre-ivy-jump-to-ns ()
   "Jump to a namespace in current buffer, using ivy to select."
   (interactive)
-  (let ((name (outre--choose-ns-name-with-ivy)))
+  (let ((name (outre--choose-ns-name-with-ivy "Namespace to jump to: ")))
     (when name
       (outre--jump-to-ns (outre--get-ns-by-name name)))))
 
@@ -362,9 +392,17 @@ If POS is before or after the namespace bounds, return nil."
   "Select a namespace, then change its name."
   (interactive)
   (outre-scan-buffer)
-  (let ((name (outre--choose-ns-name-with-ivy)))
+  (let ((name (outre--choose-ns-name-with-ivy "Namespace to change: ")))
     (when name
       (outre--change-ns-name (outre--get-ns-by-name name)))))
+
+(defun outre-delete-ns-by-name ()
+  "Select a namespace, then delete it (though not its content)."
+  (interactive)
+  (outre-scan-buffer)
+  (let ((name (outre--choose-ns-name-with-ivy "Namespace to delete: ")))
+    (when name
+      (outre--delete-ns (outre--get-ns-by-name name)))))
 
 (defun outre-print-enclosing-ns-name ()
   "Print the closest namespace surrounding point, if any."
@@ -374,7 +412,7 @@ If POS is before or after the namespace bounds, return nil."
     (when ns
       (message "Namespace: %s" (car (outre--get-ns-names ns))))))
 
-(defun outre--choose-ns-name-with-ivy ()
+(defun outre--choose-ns-name-with-ivy (&optional prompt)
   "Use ivy to select a namespace in the current buffer."
   (outre-scan-buffer)
   (let ((lst (mapcar
@@ -382,7 +420,8 @@ If POS is before or after the namespace bounds, return nil."
                 (cadr (outre--get-ns-names elt)))
               outre-list))
         name)
-    (ivy-read "Namespace: " (nreverse lst)
+    (unless prompt (setq prompt "Namespace: "))
+    (ivy-read prompt (nreverse lst)
               :re-builder #'ivy--regex
               :sort nil
               :initial-input nil)))
