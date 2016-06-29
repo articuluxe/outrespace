@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-23 08:19:51 dharms>
+;; Modified Time-stamp: <2016-06-29 08:31:42 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -35,8 +35,15 @@
   "Namespacer mode."
   :group 'outrespace)
 
+(defcustom outre-prefix (kbd "C-c n")
+  "Prefix key for outrespace-mode."
+  :group 'outrespace
+  :type 'vector
+  )
+
 (defface outre-highlight-face
-  '((t (:foreground "wheat" :background "cadetblue4" :bold t)))
+  '((t :inherit highlight))
+;  '((t (:foreground "wheat" :background "cadetblue4" :bold t)))
   "Font lock mode face used to highlight namespace names."
   :group 'outrespace-mode)
 
@@ -122,7 +129,7 @@ Store in result `outre-list'."
   (interactive)
   (let ((start (current-time)))
     (setq outre-list (outre--scan-all-ns))
-    (message "It took %.3f to scan buffer's namespaces"
+    (message "It took %.3f sec. to scan buffer's namespaces"
              (float-time (time-subtract (current-time) start)))))
 
 ;;;###autoload
@@ -159,11 +166,11 @@ Store in result `outre-list'."
                     delim)
                 (setq ns (and beg (outre-parse-namespace beg)))
                 (setq delim (and ns (outre--get-ns-delimiter-pos ns)))
-                ;; if between delimiters, choose current
-                ;; if outside (before) delimiters, search for previous
-                ;; this seems to work intuitively; but relies on point
+                ;; If between delimiters, choose current.
+                ;; If outside (before) delimiters, search for previous.
+                ;; This seems to work intuitively; but relies on point
                 ;; being before the beginning delimiter when a namespace
-                ;; is selected
+                ;; is selected.
                 (when delim
                   (unless (< (car delim) pt)
                     (setq beg (outre--find-ns-previous))
@@ -286,15 +293,18 @@ If POS is before or after the namespace bounds, return nil."
                 (outre--get-distance-from-begin pos ns))
               lst))
 
-;; (defun outre--sort-namespaces-by-distance (pos lst)
-;;   "Sort a list of namespaces in LST by the distance to POS."
-;;   (sort lst
-;;         (lambda (lhs rhs)
-;;           ;; todo
-;;           )))
+(defun outre--sort-namespaces-by-distance (pos lst)
+  "Sort a list of namespaces in LST by the distance to POS."
+  (sort lst
+        (lambda (lhs rhs)
+          (< (outre--get-distance-from-begin pos lhs)
+             (outre--get-distance-from-begin pos rhs))
+          )))
 
-(defun outre--find-enclosing-ns ()
-  "Return the namespace around point, if any."
+(defun outre--find-enclosing-ns-manual ()
+  "Return the namespace around point, if any.
+This scans the buffer ad-hoc, not using the results already
+stored in `outre-list', if any."
   (save-excursion
     (catch 'found
       (let* ((pt (point))
@@ -305,6 +315,18 @@ If POS is before or after the namespace bounds, return nil."
             (throw 'found ns))
           (setq beg (outre--find-ns-previous))
           (setq ns (and beg (outre-parse-namespace beg))))))))
+
+(defun outre--find-enclosing-ns ()
+  "Return the namespace around point, if any.
+This uses the results, if any, of a previous buffer scan,
+stored in `outre-list'."
+  (let ((pt (point))
+        (lst outre-list)
+        srt)
+    (setq srt (outre--sort-namespaces-by-distance
+               pt
+               (outre--collect-namespaces-around-pos pt lst)))
+    (car srt)))
 
 (defun outre-change-enclosing-ns-name ()
   "Change the name of the enclosing namespace, if one exists."
@@ -330,7 +352,9 @@ If POS is before or after the namespace bounds, return nil."
       ;; change any comment with old name at ns end
       ;; (only look on same line as last delimiter)
       (goto-char (cadr (outre--get-ns-delimiter-pos ns)))
-      (when (search-forward old (line-end-position) t)
+      (when (and
+             (search-forward old (line-end-position) t)
+             (nth 4 (syntax-ppss)))
         (if (string-blank-p new)
             (replace-match "anonymous")
           (replace-match new))))
@@ -410,7 +434,7 @@ This removes the tags and delimiters, not the content."
   (outre-scan-buffer)
   (let ((ns (outre--find-enclosing-ns)))
     (when ns
-      (message "Namespace: %s" (car (outre--get-ns-names ns))))))
+      (message "Namespace: %s" (cadr (outre--get-ns-names ns))))))
 
 (defun outre--choose-ns-name-with-ivy (&optional prompt)
   "Use ivy to select a namespace in the current buffer."
@@ -451,7 +475,19 @@ This removes the tags and delimiters, not the content."
   "Define keys for `outre-mode'."
   (define-key outrespace-mode-map "\M-p" 'outre-goto-namespace-previous)
   (define-key outrespace-mode-map "\M-n" 'outre-goto-namespace-next)
+  (define-key outrespace-mode-map "p" 'outre-print-enclosing-ns-name)
+  (define-key outrespace-mode-map "n" 'outre-wrap-namespace-region)
+  (define-key outrespace-mode-map "j" 'outre-ivy-jump-to-ns)
+  (define-key outrespace-mode-map "c" 'outre-change-ns-name)
+  (define-key outrespace-mode-map "C" 'outre-change-enclosing-ns-name)
+  (define-key outrespace-mode-map "d" 'outre-delete-ns-by-name)
+  (define-key outrespace-mode-map "D" 'outre-delete-enclosing-ns)
+  (define-key outrespace-mode-map [t] 'outre-turn-off)
   )
+
+(defun outre-turn-off ()
+  (interactive)
+  (outrespace-mode -1))
 
 (define-minor-mode outrespace-mode
   "Helper for c++ namespaces."
