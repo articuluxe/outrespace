@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-06-29 08:31:42 dharms>
+;; Modified Time-stamp: <2016-08-05 08:13:13 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -468,22 +468,39 @@ This removes the tags and delimiters, not the content."
           (insert name " "))
       (insert "{\n\n")))
 
-(defvar outrespace-mode-map (make-sparse-keymap)
+(defun outrespace-define-keys (map)
+  "Define in MAP key bindings for `outrespace-mode'."
+  (define-key map "\M-p" 'outre-goto-namespace-previous)
+  (define-key map "\M-n" 'outre-goto-namespace-next)
+  (define-key map "p" 'outre-print-enclosing-ns-name)
+  (define-key map "n" 'outre-wrap-namespace-region)
+  (define-key map "j" 'outre-ivy-jump-to-ns)
+  (define-key map "c" 'outre-change-ns-name)
+  (define-key map "C" 'outre-change-enclosing-ns-name)
+  (define-key map "d" 'outre-delete-ns-by-name)
+  (define-key map "D" 'outre-delete-enclosing-ns)
+  (define-key map [t] 'outre-turn-off)
+  )
+
+(defvar outrespace-mode-map
+  (let ((map (make-sparse-keymap)))
+    (outrespace-define-keys map)
+    map)
   "Keymap for `outre-mode'.")
 
-(defun outre-define-keys ()
-  "Define keys for `outre-mode'."
-  (define-key outrespace-mode-map "\M-p" 'outre-goto-namespace-previous)
-  (define-key outrespace-mode-map "\M-n" 'outre-goto-namespace-next)
-  (define-key outrespace-mode-map "p" 'outre-print-enclosing-ns-name)
-  (define-key outrespace-mode-map "n" 'outre-wrap-namespace-region)
-  (define-key outrespace-mode-map "j" 'outre-ivy-jump-to-ns)
-  (define-key outrespace-mode-map "c" 'outre-change-ns-name)
-  (define-key outrespace-mode-map "C" 'outre-change-enclosing-ns-name)
-  (define-key outrespace-mode-map "d" 'outre-delete-ns-by-name)
-  (define-key outrespace-mode-map "D" 'outre-delete-enclosing-ns)
-  (define-key outrespace-mode-map [t] 'outre-turn-off)
-  )
+(defcustom outrespace-prefix-key
+  "\C-cn"
+  "Prefix key for `outrespace-mode'.")
+
+(defun outrespace-define-prefix (map)
+  "Define a prefix keymap MAP for `outrespace-mode'."
+  (define-key map outrespace-prefix-key outrespace-mode-map))
+
+(defvar outrespace-prefix-map
+  (let ((map (make-sparse-keymap)))
+    (outrespace-define-prefix map)
+    map)
+  "Prefix keymap for `outrespace-mode'.")
 
 (defun outre-turn-off ()
   (interactive)
@@ -493,7 +510,7 @@ This removes the tags and delimiters, not the content."
   "Helper for c++ namespaces."
   :init-value nil
   :lighter " NS"
-  :keymap outrespace-mode-map
+  :keymap outrespace-prefix-map
   (if outrespace-mode
       (outre-define-keys)
     t))
