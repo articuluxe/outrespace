@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-08-05 08:13:13 dharms>
+;; Modified Time-stamp: <2016-09-12 08:22:00 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -253,7 +253,7 @@ PARENT contains any enclosing namespaces."
       (forward-sexp)
       (setq end (point))
       (setq tag-pos (list beg end))
-      (unless (search-forward-regexp "\\s-+\\(?:\\(\\sw+\\|\\s.+\\)\\s-+\\)?\\({\\)" nil t)
+      (unless (search-forward-regexp "\\s-+\\([A-Za-z0-9:_]+\\s-+\\)?\\({\\)" nil t)
         (error "error parsing namespace"))
       ;; get bounds of opening delimiter `{'
       (goto-char (match-beginning 2))
@@ -265,7 +265,9 @@ PARENT contains any enclosing namespaces."
       (setq title (match-string-no-properties 1)) ;may have whitespace
       (setq beg (match-beginning 1))
       (setq end (match-end 1))
-      (if (and title (string-trim title)) ;string-trim alters match-data
+      ;; note string-trim alters match-data
+      (if (and title (setq title (string-trim title)))
+
           (setq name-pos (list beg end))
         (setq name-pos (list (1+ (cadr tag-pos)) (1+ (cadr tag-pos))))
         (setq title outre-anon-name))
