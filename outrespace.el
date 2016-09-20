@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-09-12 08:22:00 dharms>
+;; Modified Time-stamp: <2016-09-20 17:27:37 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -49,6 +49,9 @@
 
 (defvar outre-anon-name "<anon>"
   "A display name for anonymous namespaces.")
+
+(defvar outre-debug nil
+  "Whether to print debugging statistics to the `*Messages*' buffer.")
 
 (defun outre-in-comment-or-string ()
   "Return t if point is within a comment or string."
@@ -129,8 +132,9 @@ Store in result `outre-list'."
   (interactive)
   (let ((start (current-time)))
     (setq outre-list (outre--scan-all-ns))
-    (message "It took %.3f sec. to scan buffer's namespaces"
-             (float-time (time-subtract (current-time) start)))))
+    (when outre-debug
+      (message "It took %.3f sec. to scan buffer's namespaces"
+               (float-time (time-subtract (current-time) start))))))
 
 ;;;###autoload
 (defun outre-goto-namespace-next ()
