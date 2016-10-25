@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-10-25 08:22:00 dharms>
+;; Modified Time-stamp: <2016-10-25 08:28:27 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -42,7 +42,7 @@
   )
 
 (defface outre-highlight-face
-  '((t :inherit highlight))
+  '((t :inherit highlight :bold t))
 ;  '((t (:foreground "wheat" :background "cadetblue4" :bold t)))
   "Font lock mode face used to highlight namespace names."
   :group 'outrespace-mode)
@@ -272,7 +272,7 @@ PARENT contains any enclosing namespaces."
       ;; note string-trim alters match-data
       (if (and title (setq title (string-trim title)))
 
-          (setq name-pos (list beg end))
+          (setq name-pos (list beg (- end 1)))
         (setq name-pos (list (1+ (cadr tag-pos)) (1+ (cadr tag-pos))))
         (setq title outre-anon-name))
       (list (list title (if parent
