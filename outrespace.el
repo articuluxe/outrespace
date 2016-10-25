@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-09-20 17:27:37 dharms>
+;; Modified Time-stamp: <2016-10-25 08:22:00 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -200,7 +200,7 @@ Store in result `outre-list'."
            (throw 'found (match-beginning 0))))))
 
 (defun outre--at-ns-begin-p (loc)
-  "Evaluate whether point is at the beginning of a namespace."
+  "Evaluate whether location LOC is at the beginning of a namespace."
   (looking-at "namespace"))
 
 (defun outre--namespace-nested-p (ns)
@@ -395,6 +395,16 @@ This removes the tags and delimiters, not the content."
         (goto-char start)
         (outre--clean-up-ws-around-point)))))
 
+(defun outre--highlight-ns (ns)
+  "Highlight the namespace denoted by NS."
+  (when ns
+    (let ((start (car (outre--get-ns-delimiter-pos ns)))
+          (end (cadr (outre--get-ns-delimiter-pos ns))))
+      (goto-char start)
+      (set-mark-command nil)
+      (goto-char end)
+      (setq deactivate-mark nil))))
+
 (defun outre--clean-up-ws-around-point ()
   "Clean up whitespace around point."
   (just-one-space)
@@ -433,6 +443,14 @@ This removes the tags and delimiters, not the content."
   (let ((name (outre--choose-ns-name-with-ivy "Namespace to delete: ")))
     (when name
       (outre--delete-ns (outre--get-ns-by-name name)))))
+
+(defun outre-highlight-ns-by-name ()
+  "Select a namespace, then highlight it."
+  (interactive)
+  (outre-scan-buffer)
+  (let ((name (outre--choose-ns-name-with-ivy "Namespace to highlight: ")))
+    (when name
+      (outre--highlight-ns (outre--get-ns-by-name name)))))
 
 (defun outre-print-enclosing-ns-name ()
   "Print the closest namespace surrounding point, if any."
@@ -485,6 +503,7 @@ This removes the tags and delimiters, not the content."
   (define-key map "C" 'outre-change-enclosing-ns-name)
   (define-key map "d" 'outre-delete-ns-by-name)
   (define-key map "D" 'outre-delete-enclosing-ns)
+  (define-key map "h" 'outre-highlight-ns-by-name)
   (define-key map [t] 'outre-turn-off)
   )
 
