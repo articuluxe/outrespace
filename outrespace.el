@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-10-25 08:28:27 dharms>
+;; Modified Time-stamp: <2016-11-11 17:34:16 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -248,7 +248,7 @@ The resultant list may have only one element."
   "Parse the namespace starting at LOC.
 PARENT contains any enclosing namespaces."
   (save-excursion
-    (let (tag-pos name-pos delimiter-pos title beg end)
+    (let (tag-pos name-pos delimiter-pos title beg end title-trimmed)
       (goto-char loc)
       (unless (outre--at-ns-begin-p loc)
         (error "not looking at valid namespace"))
@@ -257,7 +257,7 @@ PARENT contains any enclosing namespaces."
       (forward-sexp)
       (setq end (point))
       (setq tag-pos (list beg end))
-      (unless (search-forward-regexp "\\s-+\\([A-Za-z0-9:_]+\\s-+\\)?\\({\\)" nil t)
+      (unless (search-forward-regexp "\\s-+\\([A-Za-z0-9:_]+\\s-*\\)?\\({\\)" nil t)
         (error "error parsing namespace"))
       ;; get bounds of opening delimiter `{'
       (goto-char (match-beginning 2))
@@ -270,14 +270,13 @@ PARENT contains any enclosing namespaces."
       (setq beg (match-beginning 1))
       (setq end (match-end 1))
       ;; note string-trim alters match-data
-      (if (and title (setq title (string-trim title)))
-
-          (setq name-pos (list beg (- end 1)))
+      (if (and title (setq title-trimmed (string-trim title)))
+          (setq name-pos (list beg (+ beg (length title-trimmed))))
         (setq name-pos (list (1+ (cadr tag-pos)) (1+ (cadr tag-pos))))
-        (setq title outre-anon-name))
-      (list (list title (if parent
-                            (concat parent "::" title)
-                          title))
+        (setq title-trimmed outre-anon-name))
+      (list (list title-trimmed (if parent
+                            (concat parent "::" title-trimmed)
+                          title-trimmed))
             tag-pos name-pos delimiter-pos))))
 
 (defun outre--get-full-extant (ns)
