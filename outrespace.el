@@ -1,9 +1,9 @@
 ;;; outrespace.el --- c++ namespace utility functions
-;; Copyright (C) 2016  Dan Harms (dharms)
+;; Copyright (C) 2016-2017  Dan Harms (dharms)
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2016-11-11 17:34:16 dharms>
+;; Modified Time-stamp: <2017-01-09 08:03:42 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -257,8 +257,17 @@ PARENT contains any enclosing namespaces."
       (forward-sexp)
       (setq end (point))
       (setq tag-pos (list beg end))
-      (unless (search-forward-regexp "\\s-+\\([A-Za-z0-9:_]+\\s-*\\)?\\({\\)" nil t)
-        (error "error parsing namespace"))
+      (unless
+          (search-forward-regexp
+           (concat
+            ;; whitespace (including newline)
+            "\\(?:\\s-\\|\n\\)+"
+            ;; optional namespace name followed by whitespace
+            "\\([A-Za-z0-9:_]+\\(\\s-\\|\n\\)*\\)?"
+            ;; opening brace (excluding surrounding whitespace)
+            "\\(?:\\s-*\\|\n\\)*\\({\\)")
+           nil t)
+        (error "Error parsing namespace"))
       ;; get bounds of opening delimiter `{'
       (goto-char (match-beginning 2))
       (setq beg (point))
