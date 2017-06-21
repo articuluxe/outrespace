@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-01-09 08:03:42 dharms>
+;; Modified Time-stamp: <2017-06-21 17:42:31 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -25,6 +25,9 @@
 ;;
 
 ;;; Code:
+(require 'subr-x)
+(require 'ivy)
+(require 'seq)
 
 (make-variable-buffer-local
  (defvar outre-list
@@ -500,7 +503,7 @@ This removes the tags and delimiters, not the content."
           (insert name " "))
       (insert "{\n\n")))
 
-(defun outrespace-define-keys (map)
+(defun outre-define-keys (map)
   "Define in MAP key bindings for `outrespace-mode'."
   (define-key map "\M-p" 'outre-goto-namespace-previous)
   (define-key map "\M-n" 'outre-goto-namespace-next)
@@ -517,7 +520,7 @@ This removes the tags and delimiters, not the content."
 
 (defvar outrespace-mode-map
   (let ((map (make-sparse-keymap)))
-    (outrespace-define-keys map)
+    (outre-define-keys map)
     map)
   "Keymap for `outre-mode'.")
 
@@ -545,7 +548,7 @@ This removes the tags and delimiters, not the content."
   :lighter " NS"
   :keymap outrespace-prefix-map
   (if outrespace-mode
-      (outre-define-keys)
+      (outre-define-keys outrespace-mode-map)
     t))
 
 (provide 'outrespace)
