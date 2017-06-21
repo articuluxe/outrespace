@@ -5,7 +5,7 @@
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, March 23, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-21 08:10:38 dharms>
+;; Modified Time-stamp: <2017-06-21 08:29:57 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace namespace
 
@@ -31,8 +31,32 @@
 (load-file "test/outrespace-test-common.el")
 (require 'outrespace)
 
-(ert-deftest ert-outrespaace-testie ()
-  (should t))
+(ert-deftest ert-outre-test-in-comment-or-string ()
+  (with-temp-buffer
+    (c++-mode)
+    (insert "int decl; // this is a comment")
+    (goto-char (point-min))
+    (should (outre-not-in-comment-or-string))
+    (search-forward-regexp "//")
+    (should (outre-in-comment-or-string))
+    ))
+
+(ert-deftest ert-outre-test-parse-ns ()
+  (with-temp-buffer
+    (c++-mode)
+    (insert"
+#include <file>
+
+namespace my_namespace {
+
+int decl;
+
+}
+
+")
+    (outre-scan-buffer)
+    (should (eq (seq-length outre-list) 1))
+    ))
 
 (ert-run-tests-batch-and-exit (car argv))
 
