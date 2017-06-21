@@ -1,13 +1,11 @@
-#!/bin/sh
-":"; exec "$EMACSX" --quick --script "$0" -- "$@" # -*- mode: emacs-lisp; -*-
-;;; test_outrespace.el --- test outrespace.el
+;;; outrespace-test-common.el --- common test utilities for outrespaace
 ;; Copyright (C) 2017  Dan Harms (dharms)
 ;; Author: Dan Harms <enniomore@icloud.com>
-;; Created: Thursday, March 23, 2017
+;; Created: Wednesday, June 21, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-21 08:10:38 dharms>
+;; Modified Time-stamp: <2017-06-21 08:08:32 dharms>
 ;; Modified by: Dan Harms
-;; Keywords: outrespace namespace
+;; Keywords: outrespace test
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,13 +25,25 @@
 ;;
 
 ;;; Code:
+;; transfer dependencies from argv into load-path
+(let ((lst (cdr argv))
+      add elt)
+  (setq argv nil)
+  (while lst
+    (setq elt (car lst))
+    (if add
+        (progn
+          (push elt load-path)
+          (setq add nil))
+      (unless
+          (setq add (string= elt "-L"))
+        (push elt argv)))
+    (setq lst (cdr lst))))
+(push (concat (file-name-directory load-file-name) "/..") load-path)
+(push (file-name-directory load-file-name) load-path)
 
-(load-file "test/outrespace-test-common.el")
-(require 'outrespace)
 
-(ert-deftest ert-outrespaace-testie ()
-  (should t))
+(require 'ert)
+(setq debug-on-error t)
 
-(ert-run-tests-batch-and-exit (car argv))
-
-;;; test_outrespace.el ends here
+;;; outrespace-test-common.el ends here
