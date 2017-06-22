@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-21 17:42:31 dharms>
+;; Modified Time-stamp: <2017-06-22 08:17:37 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -254,7 +254,7 @@ PARENT contains any enclosing namespaces."
     (let (tag-pos name-pos delimiter-pos title beg end title-trimmed)
       (goto-char loc)
       (unless (outre--at-ns-begin-p loc)
-        (error "not looking at valid namespace"))
+        (error "Not looking at valid namespace"))
       ;; get bounds of namespace tag
       (setq beg (point))
       (forward-sexp)
