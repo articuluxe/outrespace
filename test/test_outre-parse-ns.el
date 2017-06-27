@@ -5,7 +5,7 @@
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, June 22, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-26 17:52:37 dharms>
+;; Modified Time-stamp: <2017-06-27 08:04:36 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: test outrespace
 
@@ -44,7 +44,7 @@
       (forward-sexp)
       (should (search-forward-regexp (outre--namespace-regexp) nil t))
       (should (string= (save-match-data (string-trim (match-string 1))) "name"))
-      (should (string= (match-string 3) "{"))
+      (should (string= (match-string 2) "{"))
       )))
 
 (ert-deftest outre-test-parse-ns-regexp ()
@@ -105,6 +105,44 @@ name{ }")
 /* useless comments */ }")
   (outre-test-parse-ns-helper " namespace \n\n  \nns { /* useless comments */ }")
   (outre-test-parse-ns-helper " namespace ns \n\n\n  { \n /* useless comments */ }")
+  )
+
+(defun outre-test-parse-anon-ns-helper (str)
+  "Test the namespace parsing against STR."
+  (let (ns)
+    (with-temp-buffer
+      (c++-mode)
+      (insert str)
+      (outre-scan-buffer)
+      (should (eq (seq-length outre-list) 1))
+      (setq ns (car outre-list))
+      (should (equal (outre--get-ns-names ns)
+                     '("<anon>" "<anon>")))
+      )))
+
+(ert-deftest outre-test-parse-anon-ns ()
+  (outre-test-parse-anon-ns-helper "namespace { /* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace { /* useless comments */ }")
+  (outre-test-parse-anon-ns-helper "  namespace{ /* useless comments */ } ")
+  (outre-test-parse-anon-ns-helper " namespace {/* useless comments */ }")
+  (outre-test-parse-anon-ns-helper "   namespace {/* useless comments */ }")
+  (outre-test-parse-anon-ns-helper "  namespace{/* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace {
+/* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace
+{ /* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace
+
+ { /* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace{
+/* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace
+ { /* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace    \n{ /* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace    \n {
+/* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace \n\n  \n { /* useless comments */ }")
+  (outre-test-parse-anon-ns-helper " namespace \n\n\n  { \n /* useless comments */ }")
   )
 
 (ert-run-tests-batch-and-exit (car argv))

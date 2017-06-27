@@ -249,10 +249,9 @@ The resultant list may have only one element."
 (defun outre--namespace-regexp ()
   "Define a regexp to parse a namespace declaration."
   (concat
-   ;; whitespace (including newline)
-   "\\(?:\\s-\\|\n\\)+"
-   ;; optional namespace name followed by whitespace
-   "\\([A-Za-z0-9:_]+\\(\\s-\\|\n\\)*\\)?"
+   ;; an optional group comprised of mandatory whitespace
+   ;; and a namespace name
+   "\\(?:\\(?:\\s-\\|\n\\)+\\([A-Za-z0-9:_]+\\)\\)?"
    ;; opening brace (excluding surrounding whitespace)
    "\\(?:\\s-*\\|\n\\)*\\({\\)"))
 
@@ -275,7 +274,7 @@ PARENT contains any enclosing namespaces."
            nil t)
         (error "Error parsing namespace"))
       ;; get bounds of opening delimiter `{'
-      (goto-char (match-beginning 3))
+      (goto-char (match-beginning 2))
       (setq beg (point))
       (forward-list)
       (setq end (point))
