@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-22 08:17:37 dharms>
+;; Modified Time-stamp: <2017-06-26 17:53:00 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -97,8 +97,7 @@
                    (setq
                     parent
                     (catch 'found
-                      (seq-doseq
-                          (elt lst)
+                      (dolist (elt lst)
                         (if (outre--get-distance-from-begin beg elt)
                             (throw 'found elt) nil)))))
                   (cadr (outre--get-ns-names parent))
@@ -247,6 +246,16 @@ The resultant list may have only one element."
   "Return the list '(beg end) of the scope {} of NS."
   (nth 3 ns))
 
+(defun outre--namespace-regexp ()
+  "Define a regexp to parse a namespace declaration."
+  (concat
+   ;; whitespace (including newline)
+   "\\(?:\\s-\\|\n\\)+"
+   ;; optional namespace name followed by whitespace
+   "\\([A-Za-z0-9:_]+\\(\\s-\\|\n\\)*\\)?"
+   ;; opening brace (excluding surrounding whitespace)
+   "\\(?:\\s-*\\|\n\\)*\\({\\)"))
+
 (defun outre-parse-namespace (loc &optional parent)
   "Parse the namespace starting at LOC.
 PARENT contains any enclosing namespaces."
@@ -262,17 +271,11 @@ PARENT contains any enclosing namespaces."
       (setq tag-pos (list beg end))
       (unless
           (search-forward-regexp
-           (concat
-            ;; whitespace (including newline)
-            "\\(?:\\s-\\|\n\\)+"
-            ;; optional namespace name followed by whitespace
-            "\\([A-Za-z0-9:_]+\\(\\s-\\|\n\\)*\\)?"
-            ;; opening brace (excluding surrounding whitespace)
-            "\\(?:\\s-*\\|\n\\)*\\({\\)")
+           (outre--namespace-regexp)
            nil t)
         (error "Error parsing namespace"))
       ;; get bounds of opening delimiter `{'
-      (goto-char (match-beginning 2))
+      (goto-char (match-beginning 3))
       (setq beg (point))
       (forward-list)
       (setq end (point))
