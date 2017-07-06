@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-26 17:53:00 dharms>
+;; Modified Time-stamp: <2017-07-06 17:30:11 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -29,14 +29,15 @@
 (require 'ivy)
 (require 'seq)
 
+(defgroup outrespace nil
+  "C++ namespace wrangler."
+  :group 'programming
+  :prefix "outrespace")
+
 (make-variable-buffer-local
  (defvar outre-list
    '()
    "List of namespaces in the current buffer."))
-
-(defgroup outrespace-mode nil
-  "Namespacer mode."
-  :group 'outrespace)
 
 (defcustom outre-prefix (kbd "C-c n")
   "Prefix key for outrespace-mode."
@@ -48,7 +49,7 @@
   '((t :inherit highlight :bold t))
 ;  '((t (:foreground "wheat" :background "cadetblue4" :bold t)))
   "Font lock mode face used to highlight namespace names."
-  :group 'outrespace-mode)
+  :group 'outrespace)
 
 (defvar outre-anon-name "<anon>"
   "A display name for anonymous namespaces.")
