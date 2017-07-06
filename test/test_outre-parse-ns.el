@@ -5,7 +5,7 @@
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, June 22, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-27 17:29:23 dharms>
+;; Modified Time-stamp: <2017-07-06 17:37:34 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: test outrespace
 
@@ -39,7 +39,7 @@
     (let ((loc (outre--find-ns-next)))
       (should loc)
       (goto-char loc)
-      (should (outre--at-ns-begin-p loc))
+      (should (outre--at-ns-begin-p))
       (should (string= (match-string 0) "namespace"))
       (forward-sexp)
       (should (search-forward-regexp (outre--namespace-regexp) nil t))

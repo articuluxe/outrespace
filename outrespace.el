@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-07-06 17:30:11 dharms>
+;; Modified Time-stamp: <2017-07-06 17:34:56 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -202,7 +202,7 @@ Store in result `outre-list'."
       (and (outre-not-in-comment-or-string)
            (throw 'found (match-beginning 0))))))
 
-(defun outre--at-ns-begin-p (loc)
+(defun outre--at-ns-begin-p ()
   "Evaluate whether location LOC is at the beginning of a namespace."
   (looking-at "namespace"))
 
@@ -262,7 +262,7 @@ PARENT contains any enclosing namespaces."
   (save-excursion
     (let (tag-pos name-pos delimiter-pos title beg end title-trimmed)
       (goto-char loc)
-      (unless (outre--at-ns-begin-p loc)
+      (unless (outre--at-ns-begin-p)
         (error "Not looking at valid namespace"))
       ;; get bounds of namespace tag
       (setq beg (point))
