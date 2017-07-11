@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-07-06 17:34:56 dharms>
+;; Modified Time-stamp: <2017-07-11 17:38:23 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -71,7 +71,7 @@
   (goto-char (car (outre--get-ns-delimiter-pos ns))))
 
 (defun outre--on-namespace-selected (ns)
-  "Select a namespace."
+  "Highlight a namespace NS."
   (let ((name (outre--get-ns-name-pos ns))
         beg end str ov)
     (outre--move-point-to-ns ns)
@@ -308,13 +308,13 @@ If POS is before or after the namespace bounds, return nil."
       nil)))
 
 (defun outre--collect-namespaces-around-pos (pos lst)
-  "Return a list of all namespaces in LST which surround POS."
+  "Return all namespaces that surround POS from LST."
   (seq-filter (lambda (ns)
                 (outre--get-distance-from-begin pos ns))
               lst))
 
 (defun outre--sort-namespaces-by-distance (pos lst)
-  "Sort a list of namespaces in LST by the distance to POS."
+  "Sort namespaces around POS from LST, according to distance."
   (sort lst
         (lambda (lhs rhs)
           (< (outre--get-distance-from-begin pos lhs)
@@ -425,7 +425,7 @@ This removes the tags and delimiters, not the content."
   (delete-blank-lines))
 
 (defun outre--jump-to-ns (ns)
-  "Jump to the beginning of namespace NAME."
+  "Jump to the beginning of namespace NS."
   (when ns
     (outre--on-namespace-selected ns)))
 
@@ -475,7 +475,7 @@ This removes the tags and delimiters, not the content."
       (message "Namespace: %s" (cadr (outre--get-ns-names ns))))))
 
 (defun outre--choose-ns-name-with-ivy (&optional prompt)
-  "Use ivy to select a namespace in the current buffer."
+  "Use ivy (with prompt PROMPT) to select a namespace in the current buffer."
   (outre-scan-buffer)
   (let ((lst (mapcar
               (lambda(elt)
@@ -542,6 +542,7 @@ This removes the tags and delimiters, not the content."
   "Prefix keymap for `outrespace-mode'.")
 
 (defun outre-turn-off ()
+  "Turn off `outrespace-mode'."
   (interactive)
   (outrespace-mode -1))
 
