@@ -5,7 +5,7 @@
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, June 22, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-07-06 17:37:34 dharms>
+;; Modified Time-stamp: <2017-07-12 08:04:40 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: test outrespace
 
@@ -280,6 +280,50 @@ name{ }")
   (outre-test-parse-anon-nested-ns-helper "namespace  { namespace nested { /* useless comments */ } }\n")
   )
 
+(defun outre-test-parse-nested-and-anon-ns-helper (str)
+  "Test the namespace parsing against STR."
+  (let (ns)
+    (with-temp-buffer
+      (c++-mode)
+      (insert str)
+      (outre-scan-buffer)
+      (should (eq (seq-length outre-list) 2))
+      (setq ns (car outre-list))
+      (should (equal (outre--get-ns-names ns)
+                     '("<anon>" "<anon>::<anon>")))
+      (setq ns (cadr outre-list))
+      (should (equal (outre--get-ns-names ns)
+                     '("<anon>" "<anon>")))
+      )))
+
+(ert-deftest outre-test-parse-anon-and-nested-ns ()
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace { namespace  { /* useless comments */ }}")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace { namespace  { /* useless comments */} }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace{ namespace  {/* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace{ namespace { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace {namespace  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace{ namespace  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "  namespace      {  namespace      {   /* useless comments */ }   } ")
+  (outre-test-parse-nested-and-anon-ns-helper "\nnamespace { namespace  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace\n  { namespace { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace \n { namespace  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace \n { namespace  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  \n{ namespace { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  {\n namespace  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { \nnamespace { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace\n  { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace \n { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace \n { /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace \n{ /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace  {\n /* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace  { \n/* useless comments */ } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace  { /* useless comments */\n } }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace { /* useless comments */ \n} }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace  { /* useless comments */ }\n }")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace  { /* useless comments */ } \n}")
+  (outre-test-parse-nested-and-anon-ns-helper "namespace  { namespace { /* useless comments */ } }\n")
+  )
 
 
 
