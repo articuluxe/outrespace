@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-07-11 17:38:23 dharms>
+;; Modified Time-stamp: <2017-07-12 08:17:57 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: c++ namespace
 
@@ -42,12 +42,10 @@
 (defcustom outre-prefix (kbd "C-c n")
   "Prefix key for outrespace-mode."
   :group 'outrespace
-  :type 'vector
-  )
+  :type 'vector)
 
 (defface outre-highlight-face
   '((t :inherit highlight :bold t))
-;  '((t (:foreground "wheat" :background "cadetblue4" :bold t)))
   "Font lock mode face used to highlight namespace names."
   :group 'outrespace)
 
