@@ -5,7 +5,7 @@
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, March 23, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-21 08:29:57 dharms>
+;; Modified Time-stamp: <2017-07-17 08:58:12 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace namespace
 
@@ -36,9 +36,9 @@
     (c++-mode)
     (insert "int decl; // this is a comment")
     (goto-char (point-min))
-    (should (outre-not-in-comment-or-string))
+    (should (outrespace-not-in-comment-or-string))
     (search-forward-regexp "//")
-    (should (outre-in-comment-or-string))
+    (should (outrespace-in-comment-or-string))
     ))
 
 (ert-deftest ert-outre-test-parse-ns ()
@@ -54,8 +54,8 @@ int decl;
 }
 
 ")
-    (outre-scan-buffer)
-    (should (eq (seq-length outre-list) 1))
+    (outrespace-scan-buffer)
+    (should (eq (seq-length outrespace-list) 1))
     ))
 
 (ert-run-tests-batch-and-exit (car argv))

@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-07-17 08:32:09 dharms>
+;; Modified Time-stamp: <2017-07-17 08:53:54 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; Package-Requires: ((emacs "24.4"))
@@ -36,61 +36,61 @@
   :prefix "outrespace")
 
 (make-variable-buffer-local
- (defvar outre-list
+ (defvar outrespace-list
    '()
    "List of namespaces in the current buffer."))
 
-(defcustom outre-prefix (kbd "C-c n")
+(defcustom outrespace-prefix (kbd "C-c n")
   "Prefix key for outrespace-mode."
   :group 'outrespace
   :type 'vector)
 
-(defface outre-highlight-face
+(defface outrespace-highlight-face
   '((t :inherit highlight :bold t))
   "Font lock mode face used to highlight namespace names."
   :group 'outrespace)
 
-(defvar outre-anon-name "<anon>"
+(defvar outrespace-anon-name "<anon>"
   "A display name for anonymous namespaces.")
 
-(defvar outre-debug nil
+(defvar outrespace-debug nil
   "Whether to print debugging statistics to the `*Messages*' buffer.")
 
-(defun outre-in-comment-or-string ()
+(defun outrespace-in-comment-or-string ()
   "Return t if point is within a comment or string."
   (or (nth 3 (syntax-ppss))
       (nth 4 (syntax-ppss))))
 
-(defun outre-not-in-comment-or-string ()
+(defun outrespace-not-in-comment-or-string ()
   "Return t if point is not within a comment or string."
-  (not (outre-in-comment-or-string)))
+  (not (outrespace-in-comment-or-string)))
 
-(defun outre--move-point-to-ns (ns)
+(defun outrespace--move-point-to-ns (ns)
   "Move point to namespace NS."
-  (goto-char (car (outre--get-ns-delimiter-pos ns))))
+  (goto-char (car (outrespace--get-ns-delimiter-pos ns))))
 
-(defun outre--on-namespace-selected (ns)
+(defun outrespace--on-namespace-selected (ns)
   "Highlight a namespace NS."
-  (let ((name (outre--get-ns-name-pos ns))
+  (let ((name (outrespace--get-ns-name-pos ns))
         beg end str ov)
-    (outre--move-point-to-ns ns)
+    (outrespace--move-point-to-ns ns)
     (setq beg (car name))
     (setq end (cadr name))
     (setq str (buffer-substring-no-properties beg end))
     (when str
       (setq ov (make-overlay beg end))
-      (overlay-put ov 'face 'outre-highlight-face)
+      (overlay-put ov 'face 'outrespace-highlight-face)
       (sit-for 1)
       (delete-overlay ov))
     ))
 
-(defun outre--scan-all-ns ()
+(defun outrespace--scan-all-ns ()
   "Scan current buffer for all namespaces."
   (save-excursion
     (widen)
     (let ((lst '()) beg curr cont parent)
       (goto-char (point-min))
-      (while (setq beg (outre--find-ns-next))
+      (while (setq beg (outrespace--find-ns-next))
         (setq cont
               (if (and
                    beg
@@ -98,13 +98,13 @@
                     parent
                     (catch 'found
                       (dolist (elt lst)
-                        (if (outre--get-distance-from-begin beg elt)
+                        (if (outrespace--get-distance-from-begin beg elt)
                             (throw 'found elt) nil)))))
-                  (cadr (outre--get-ns-names parent))
+                  (cadr (outrespace--get-ns-names parent))
                 nil))
-        (setq curr (outre-parse-namespace beg cont))
-        (if (outre--namespace-nested-p curr)
-            (let* ((name-pos (outre--get-ns-name-pos curr))
+        (setq curr (outrespace-parse-namespace beg cont))
+        (if (outrespace--namespace-nested-p curr)
+            (let* ((name-pos (outrespace--get-ns-name-pos curr))
                    (posb (car name-pos))
                    (pose (cadr name-pos)))
               (mapc
@@ -117,41 +117,41 @@
                                      (if cont
                                          (concat cont "::" (car elt))
                                        (car elt))))
-                         (outre--get-ns-tag-pos curr)
+                         (outrespace--get-ns-tag-pos curr)
                          (list
                           (+ posb (cdr elt))
                           (+ posb (cdr elt) (length (car elt))))
-                         (outre--get-ns-delimiter-pos curr))
+                         (outrespace--get-ns-delimiter-pos curr))
                         lst)))
-               (outre--flatten-nested-names
+               (outrespace--flatten-nested-names
                 (buffer-substring-no-properties posb pose))))
           (setq lst (cons curr lst))))
       lst)))
 
-(defun outre-scan-buffer ()
+(defun outrespace-scan-buffer ()
   "Scan current buffer for all namespaces.
-Store in result `outre-list'."
+Store in result `outrespace-list'."
   (interactive)
   (let ((start (current-time)))
-    (setq outre-list (outre--scan-all-ns))
-    (when outre-debug
+    (setq outrespace-list (outrespace--scan-all-ns))
+    (when outrespace-debug
       (message "It took %.3f sec. to scan buffer's namespaces"
                (float-time (time-subtract (current-time) start))))))
 
 ;;;###autoload
-(defun outre-goto-namespace-next ()
+(defun outrespace-goto-namespace-next ()
   "Move point to the next start of a valid namespace."
   (interactive)
   (let (ns)
     (when (catch 'found
             (save-excursion
-              (let ((beg (outre--find-ns-next)))
-                (setq ns (and beg (outre-parse-namespace beg)))
+              (let ((beg (outrespace--find-ns-next)))
+                (setq ns (and beg (outrespace-parse-namespace beg)))
                 (if ns
                     (throw 'found t)
                   (message "no namespace following point")
                   nil))))
-      (outre--on-namespace-selected ns))))
+      (outrespace--on-namespace-selected ns))))
         ;; (progn
         ;;   (setq ns
         ;;   (goto-char (car (nth 2 ns)))
@@ -161,17 +161,17 @@ Store in result `outre-list'."
         ;;   )
 
 ;;;###autoload
-(defun outre-goto-namespace-previous ()
+(defun outrespace-goto-namespace-previous ()
   "Move point to the prior start of a valid namespace."
   (interactive)
   (let ((pt (point))
         ns)
     (when (catch 'found
             (save-excursion
-              (let ((beg (outre--find-ns-previous))
+              (let ((beg (outrespace--find-ns-previous))
                     delim)
-                (setq ns (and beg (outre-parse-namespace beg)))
-                (setq delim (and ns (outre--get-ns-delimiter-pos ns)))
+                (setq ns (and beg (outrespace-parse-namespace beg)))
+                (setq delim (and ns (outrespace--get-ns-delimiter-pos ns)))
                 ;; If between delimiters, choose current.
                 ;; If outside (before) delimiters, search for previous.
                 ;; This seems to work intuitively; but relies on point
@@ -179,37 +179,37 @@ Store in result `outre-list'."
                 ;; is selected.
                 (when delim
                   (unless (< (car delim) pt)
-                    (setq beg (outre--find-ns-previous))
-                    (setq ns (and beg (outre-parse-namespace beg)))))
+                    (setq beg (outrespace--find-ns-previous))
+                    (setq ns (and beg (outrespace-parse-namespace beg)))))
                 (if ns
                     (throw 'found t)
                   (message "no namespace preceding point")
                   nil))))
-      (outre--on-namespace-selected ns))))
+      (outrespace--on-namespace-selected ns))))
 
-(defun outre--find-ns-next ()
+(defun outrespace--find-ns-next ()
   "Return location of beginning of next valid namespace."
   (catch 'found
     (while (search-forward-regexp "\\_<namespace\\_>" nil t)
-      (and (outre-not-in-comment-or-string)
+      (and (outrespace-not-in-comment-or-string)
            (throw 'found (match-beginning 0))))))
 
-(defun outre--find-ns-previous ()
+(defun outrespace--find-ns-previous ()
   "Return location of beginning of previous valid namespace."
   (catch 'found
     (while (search-backward-regexp "\\_<namespace\\_>" nil t)
-      (and (outre-not-in-comment-or-string)
+      (and (outrespace-not-in-comment-or-string)
            (throw 'found (match-beginning 0))))))
 
-(defun outre--at-ns-begin-p ()
+(defun outrespace--at-ns-begin-p ()
   "Evaluate whether location LOC is at the beginning of a namespace."
   (looking-at "namespace"))
 
-(defun outre--namespace-nested-p (ns)
+(defun outrespace--namespace-nested-p (ns)
   "Return whether the namespace NS is a nested namespace (C++17)."
-  (string-match-p "::" (car (outre--get-ns-names ns))))
+  (string-match-p "::" (car (outrespace--get-ns-names ns))))
 
-(defun outre--flatten-nested-names (tags)
+(defun outrespace--flatten-nested-names (tags)
   "Flatten the input TAGS into a list of nested tags.
 Useful for C++17's nested namespaces.  The result is a list of
 cons cells, each of which is of the form: `(tag . pos)', where
@@ -230,23 +230,23 @@ The resultant list may have only one element."
                   (substring tags pos) pos) res)))
     (nreverse res)))
 
-(defun outre--get-ns-names (ns)
+(defun outrespace--get-ns-names (ns)
   "Return the list '(name full-name) of NS."
   (nth 0 ns))
 
-(defun outre--get-ns-tag-pos (ns)
+(defun outrespace--get-ns-tag-pos (ns)
   "Return the list '(beg end) of the `namespace' tag of NS."
   (nth 1 ns))
 
-(defun outre--get-ns-name-pos (ns)
+(defun outrespace--get-ns-name-pos (ns)
   "Return the list '(beg end) of the name, if any, of NS."
   (nth 2 ns))
 
-(defun outre--get-ns-delimiter-pos (ns)
+(defun outrespace--get-ns-delimiter-pos (ns)
   "Return the list '(beg end) of the scope {} of NS."
   (nth 3 ns))
 
-(defun outre--namespace-regexp ()
+(defun outrespace--namespace-regexp ()
   "Define a regexp to parse a namespace declaration."
   (concat
    ;; an optional group comprised of mandatory whitespace
@@ -255,13 +255,13 @@ The resultant list may have only one element."
    ;; opening brace (excluding surrounding whitespace)
    "\\(?:\\s-*\\|\n\\)*\\({\\)"))
 
-(defun outre-parse-namespace (loc &optional parent)
+(defun outrespace-parse-namespace (loc &optional parent)
   "Parse the namespace starting at LOC.
 PARENT contains any enclosing namespaces."
   (save-excursion
     (let (tag-pos name-pos delimiter-pos title beg end title-trimmed)
       (goto-char loc)
-      (unless (outre--at-ns-begin-p)
+      (unless (outrespace--at-ns-begin-p)
         (error "Not looking at valid namespace"))
       ;; get bounds of namespace tag
       (setq beg (point))
@@ -270,7 +270,7 @@ PARENT contains any enclosing namespaces."
       (setq tag-pos (list beg end))
       (unless
           (search-forward-regexp
-           (outre--namespace-regexp)
+           (outrespace--namespace-regexp)
            nil t)
         (error "Error parsing namespace"))
       ;; get bounds of opening delimiter `{'
@@ -287,90 +287,90 @@ PARENT contains any enclosing namespaces."
       (if (and title (setq title-trimmed (string-trim title)))
           (setq name-pos (list beg (+ beg (length title-trimmed))))
         (setq name-pos (list (1+ (cadr tag-pos)) (1+ (cadr tag-pos))))
-        (setq title-trimmed outre-anon-name))
+        (setq title-trimmed outrespace-anon-name))
       (list (list title-trimmed (if parent
                             (concat parent "::" title-trimmed)
                           title-trimmed))
             tag-pos name-pos delimiter-pos))))
 
-(defun outre--get-full-extant (ns)
+(defun outrespace--get-full-extant (ns)
   "Return the bounds (beg . end) of the full namespace extent in NS."
-  (cons (car (outre--get-ns-tag-pos ns))
-        (cadr (outre--get-ns-delimiter-pos ns))))
+  (cons (car (outrespace--get-ns-tag-pos ns))
+        (cadr (outrespace--get-ns-delimiter-pos ns))))
 
-(defun outre--get-distance-from-begin (pos ns)
+(defun outrespace--get-distance-from-begin (pos ns)
   "Return the distance of a point POS from start of namespace in NS.
 If POS is before or after the namespace bounds, return nil."
-  (let ((extant (outre--get-full-extant ns)))
+  (let ((extant (outrespace--get-full-extant ns)))
     (if (and (<= (car extant) pos) (>= (cdr extant) pos))
         (- pos (car extant))
       nil)))
 
-(defun outre--collect-namespaces-around-pos (pos lst)
+(defun outrespace--collect-namespaces-around-pos (pos lst)
   "Return all namespaces that surround POS from LST."
   (seq-filter (lambda (ns)
-                (outre--get-distance-from-begin pos ns))
+                (outrespace--get-distance-from-begin pos ns))
               lst))
 
-(defun outre--sort-namespaces-by-distance (pos lst)
+(defun outrespace--sort-namespaces-by-distance (pos lst)
   "Sort namespaces around POS from LST, according to distance."
   (sort lst
         (lambda (lhs rhs)
-          (< (outre--get-distance-from-begin pos lhs)
-             (outre--get-distance-from-begin pos rhs))
+          (< (outrespace--get-distance-from-begin pos lhs)
+             (outrespace--get-distance-from-begin pos rhs))
           )))
 
-(defun outre--find-enclosing-ns-manual ()
+(defun outrespace--find-enclosing-ns-manual ()
   "Return the namespace around point, if any.
 This scans the buffer ad-hoc, not using the results already
-stored in `outre-list', if any."
+stored in `outrespace-list', if any."
   (save-excursion
     (catch 'found
       (let* ((pt (point))
-             (beg (outre--find-ns-previous))
-             (ns (and beg (outre-parse-namespace beg))))
+             (beg (outrespace--find-ns-previous))
+             (ns (and beg (outrespace-parse-namespace beg))))
         (while ns
-          (when (outre--get-distance-from-begin pt ns)
+          (when (outrespace--get-distance-from-begin pt ns)
             (throw 'found ns))
-          (setq beg (outre--find-ns-previous))
-          (setq ns (and beg (outre-parse-namespace beg))))))))
+          (setq beg (outrespace--find-ns-previous))
+          (setq ns (and beg (outrespace-parse-namespace beg))))))))
 
-(defun outre--find-enclosing-ns ()
+(defun outrespace--find-enclosing-ns ()
   "Return the namespace around point, if any.
 This uses the results, if any, of a previous buffer scan,
-stored in `outre-list'."
+stored in `outrespace-list'."
   (let ((pt (point))
-        (lst outre-list)
+        (lst outrespace-list)
         srt)
-    (setq srt (outre--sort-namespaces-by-distance
+    (setq srt (outrespace--sort-namespaces-by-distance
                pt
-               (outre--collect-namespaces-around-pos pt lst)))
+               (outrespace--collect-namespaces-around-pos pt lst)))
     (car srt)))
 
-(defun outre-change-enclosing-ns-name ()
+(defun outrespace-change-enclosing-ns-name ()
   "Change the name of the enclosing namespace, if one exists."
   (interactive)
-  (outre-scan-buffer)
-  (let ((ns (outre--find-enclosing-ns)))
+  (outrespace-scan-buffer)
+  (let ((ns (outrespace--find-enclosing-ns)))
     (if ns
-        (outre--change-ns-name ns)
+        (outrespace--change-ns-name ns)
       (message "No enclosing namespace"))))
 
-(defun outre--change-ns-name (ns)
+(defun outrespace--change-ns-name (ns)
   "Change the name of namespace denoted by NS to NEW."
-  (let ((start (car (outre--get-ns-name-pos ns)))
-        (end (cadr (outre--get-ns-name-pos ns)))
-        (old (car (outre--get-ns-names ns)))
+  (let ((start (car (outrespace--get-ns-name-pos ns)))
+        (end (cadr (outrespace--get-ns-name-pos ns)))
+        (old (car (outrespace--get-ns-names ns)))
         new)
     (setq new (read-string
                (concat "Change namespace " old
                        " to (leave blank for anonymous): ")))
-    (when (string-equal old outre-anon-name)
+    (when (string-equal old outrespace-anon-name)
       (setq old "anonymous"))
     (save-excursion
       ;; change any comment with old name at ns end
       ;; (only look on same line as last delimiter)
-      (goto-char (cadr (outre--get-ns-delimiter-pos ns)))
+      (goto-char (cadr (outrespace--get-ns-delimiter-pos ns)))
       (when (and
              (search-forward old (line-end-position) t)
              (nth 4 (syntax-ppss)))
@@ -383,103 +383,103 @@ stored in `outre-list'."
     (insert new)
     (just-one-space)))
 
-(defun outre-delete-enclosing-ns ()
+(defun outrespace-delete-enclosing-ns ()
   "Delete the enclosing namespace, if one exists.
 This removes the tags and delimiters, not the content."
   (interactive)
-  (outre-scan-buffer)
-  (let ((ns (outre--find-enclosing-ns)))
+  (outrespace-scan-buffer)
+  (let ((ns (outrespace--find-enclosing-ns)))
     (if ns
-        (outre--delete-ns ns)
+        (outrespace--delete-ns ns)
       (message "No enclosing namespace"))))
 
-(defun outre--delete-ns (ns)
+(defun outrespace--delete-ns (ns)
   "Delete the namespace denoted by NS (though not its content)."
   (when ns
     (save-excursion
-      (let ((start (car (outre--get-ns-tag-pos ns)))
-            (end (car (outre--get-ns-delimiter-pos ns)))
-            (coda (cadr (outre--get-ns-delimiter-pos ns))))
+      (let ((start (car (outrespace--get-ns-tag-pos ns)))
+            (end (car (outrespace--get-ns-delimiter-pos ns)))
+            (coda (cadr (outrespace--get-ns-delimiter-pos ns))))
         (goto-char coda)
         (delete-char -1)
         (comment-kill 1)
-        (outre--clean-up-ws-around-point)
+        (outrespace--clean-up-ws-around-point)
         (delete-region start (1+ end))
         (goto-char start)
-        (outre--clean-up-ws-around-point)))))
+        (outrespace--clean-up-ws-around-point)))))
 
-(defun outre--highlight-ns (ns)
+(defun outrespace--highlight-ns (ns)
   "Highlight the namespace denoted by NS."
   (when ns
-    (let ((start (car (outre--get-ns-delimiter-pos ns)))
-          (end (cadr (outre--get-ns-delimiter-pos ns))))
+    (let ((start (car (outrespace--get-ns-delimiter-pos ns)))
+          (end (cadr (outrespace--get-ns-delimiter-pos ns))))
       (goto-char start)
       (set-mark-command nil)
       (goto-char end)
       (setq deactivate-mark nil))))
 
-(defun outre--clean-up-ws-around-point ()
+(defun outrespace--clean-up-ws-around-point ()
   "Clean up whitespace around point."
   (just-one-space)
   (delete-blank-lines))
 
-(defun outre--jump-to-ns (ns)
+(defun outrespace--jump-to-ns (ns)
   "Jump to the beginning of namespace NS."
   (when ns
-    (outre--on-namespace-selected ns)))
+    (outrespace--on-namespace-selected ns)))
 
-(defun outre--get-ns-by-name (name)
+(defun outrespace--get-ns-by-name (name)
   "Return the namespace matching NAME."
   (seq-find (lambda(elt)
-              (string-equal name (cadr (outre--get-ns-names elt))))
-            outre-list))
+              (string-equal name (cadr (outrespace--get-ns-names elt))))
+            outrespace-list))
 
-(defun outre-ivy-jump-to-ns ()
+(defun outrespace-ivy-jump-to-ns ()
   "Jump to a namespace in current buffer, using ivy to select."
   (interactive)
-  (let ((name (outre--choose-ns-name-with-ivy "Namespace to jump to: ")))
+  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to jump to: ")))
     (when name
-      (outre--jump-to-ns (outre--get-ns-by-name name)))))
+      (outrespace--jump-to-ns (outrespace--get-ns-by-name name)))))
 
-(defun outre-change-ns-name ()
+(defun outrespace-change-ns-name ()
   "Select a namespace, then change its name."
   (interactive)
-  (outre-scan-buffer)
-  (let ((name (outre--choose-ns-name-with-ivy "Namespace to change: ")))
+  (outrespace-scan-buffer)
+  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to change: ")))
     (when name
-      (outre--change-ns-name (outre--get-ns-by-name name)))))
+      (outrespace--change-ns-name (outrespace--get-ns-by-name name)))))
 
-(defun outre-delete-ns-by-name ()
+(defun outrespace-delete-ns-by-name ()
   "Select a namespace, then delete it (though not its content)."
   (interactive)
-  (outre-scan-buffer)
-  (let ((name (outre--choose-ns-name-with-ivy "Namespace to delete: ")))
+  (outrespace-scan-buffer)
+  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to delete: ")))
     (when name
-      (outre--delete-ns (outre--get-ns-by-name name)))))
+      (outrespace--delete-ns (outrespace--get-ns-by-name name)))))
 
-(defun outre-highlight-ns-by-name ()
+(defun outrespace-highlight-ns-by-name ()
   "Select a namespace, then highlight it."
   (interactive)
-  (outre-scan-buffer)
-  (let ((name (outre--choose-ns-name-with-ivy "Namespace to highlight: ")))
+  (outrespace-scan-buffer)
+  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to highlight: ")))
     (when name
-      (outre--highlight-ns (outre--get-ns-by-name name)))))
+      (outrespace--highlight-ns (outrespace--get-ns-by-name name)))))
 
-(defun outre-print-enclosing-ns-name ()
+(defun outrespace-print-enclosing-ns-name ()
   "Print the closest namespace surrounding point, if any."
   (interactive)
-  (outre-scan-buffer)
-  (let ((ns (outre--find-enclosing-ns)))
+  (outrespace-scan-buffer)
+  (let ((ns (outrespace--find-enclosing-ns)))
     (when ns
-      (message "Namespace: %s" (cadr (outre--get-ns-names ns))))))
+      (message "Namespace: %s" (cadr (outrespace--get-ns-names ns))))))
 
-(defun outre--choose-ns-name-with-ivy (&optional prompt)
+(defun outrespace--choose-ns-name-with-ivy (&optional prompt)
   "Use ivy (with prompt PROMPT) to select a namespace in the current buffer."
-  (outre-scan-buffer)
+  (outrespace-scan-buffer)
   (let ((lst (mapcar
               (lambda(elt)
-                (cadr (outre--get-ns-names elt)))
-              outre-list))
+                (cadr (outrespace--get-ns-names elt)))
+              outrespace-list))
         name)
     (unless prompt (setq prompt "Namespace: "))
     (ivy-read prompt (nreverse lst)
@@ -489,7 +489,7 @@ This removes the tags and delimiters, not the content."
 
 ;; namespace
 (defvar c-basic-offset)
-(defun outre-wrap-namespace-region (start end name)
+(defun outrespace-wrap-namespace-region (start end name)
   "Surround the region (START, END) with a namespace NAME."
   (interactive "r\nsEnter the namespace name (leave blank for anonymous): ")
     (save-excursion
@@ -505,26 +505,26 @@ This removes the tags and delimiters, not the content."
           (insert name " "))
       (insert "{\n\n")))
 
-(defun outre-define-keys (map)
+(defun outrespace-define-keys (map)
   "Define in MAP key bindings for `outrespace-mode'."
-  (define-key map "\M-p" 'outre-goto-namespace-previous)
-  (define-key map "\M-n" 'outre-goto-namespace-next)
-  (define-key map "p" 'outre-print-enclosing-ns-name)
-  (define-key map "n" 'outre-wrap-namespace-region)
-  (define-key map "j" 'outre-ivy-jump-to-ns)
-  (define-key map "c" 'outre-change-ns-name)
-  (define-key map "C" 'outre-change-enclosing-ns-name)
-  (define-key map "d" 'outre-delete-ns-by-name)
-  (define-key map "D" 'outre-delete-enclosing-ns)
-  (define-key map "h" 'outre-highlight-ns-by-name)
-  (define-key map [t] 'outre-turn-off)
+  (define-key map "\M-p" 'outrespace-goto-namespace-previous)
+  (define-key map "\M-n" 'outrespace-goto-namespace-next)
+  (define-key map "p" 'outrespace-print-enclosing-ns-name)
+  (define-key map "n" 'outrespace-wrap-namespace-region)
+  (define-key map "j" 'outrespace-ivy-jump-to-ns)
+  (define-key map "c" 'outrespace-change-ns-name)
+  (define-key map "C" 'outrespace-change-enclosing-ns-name)
+  (define-key map "d" 'outrespace-delete-ns-by-name)
+  (define-key map "D" 'outrespace-delete-enclosing-ns)
+  (define-key map "h" 'outrespace-highlight-ns-by-name)
+  (define-key map [t] 'outrespace-turn-off)
   )
 
 (defvar outrespace-mode-map
   (let ((map (make-sparse-keymap)))
-    (outre-define-keys map)
+    (outrespace-define-keys map)
     map)
-  "Keymap for `outre-mode'.")
+  "Keymap for `outrespace-mode'.")
 
 (defcustom outrespace-prefix-key
   "\C-cn"
@@ -540,7 +540,7 @@ This removes the tags and delimiters, not the content."
     map)
   "Prefix keymap for `outrespace-mode'.")
 
-(defun outre-turn-off ()
+(defun outrespace-turn-off ()
   "Turn off `outrespace-mode'."
   (interactive)
   (outrespace-mode -1))
@@ -551,7 +551,7 @@ This removes the tags and delimiters, not the content."
   :lighter " NS"
   :keymap outrespace-prefix-map
   (if outrespace-mode
-      (outre-define-keys outrespace-mode-map)
+      (outrespace-define-keys outrespace-mode-map)
     t))
 
 (provide 'outrespace)
