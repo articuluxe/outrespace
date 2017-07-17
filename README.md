@@ -44,9 +44,16 @@ Outerspace is a [^1]collection of utilities to manage c++ namespaces via emacs. 
 
 # Usage #
 outrespace.el needs to be in a running emacs instance's `load-path` variable.
+An example use-package invocation is:
+
+`(use-package outrespace
+  :after cc-mode
+  :config
+  (outrespace-define-prefix global-map))`
 
 ## Keys ##
 Outrespace defines its own keymap; adventurous uses can customize this.  
+
 `(use-package outrespace
   :after cc-mode
   :config 
@@ -54,8 +61,61 @@ Outrespace defines its own keymap; adventurous uses can customize this.
   (outrespace-define-prefix global-map)
   )`
 
+The following sections describe each function present in the outrespace keymap.  So commands would be invoked by first pressing the prefix key, followed by the listed key combination.
+
 ### Navigation ###
 
+- `<alt-p>`
+
+  **outre-goto-namespace-previous**
+  
+  Navigate forward in the current buffer.
+- `<alt-n>`
+
+  **outre-goto-namespace-next**
+  
+  Navigate backward in the current buffer.
+- `j`
+
+  **outre-ivy-jump-to-ns**
+  
+  Jump to a selected namespace by name.
+- `p`
+
+  **outre-print-enclosing-ns-name**
+  
+  Print the name of the namespace surrounding point, if any exists.
+- `h`
+
+  **outre-highlight-ns-by-name**
+  
+  Highlight a selected namespace by name.
+
 ### Manipulation ###
+- `n`
+
+  **outre-outre-wrap-namespace-region**
+  
+  Wrap the current region with a namespace.
+- `c`
+
+  **outre-change-ns-name**
+  
+  Change the name of a namespace, selected by name.
+- `C`
+
+  **outre-change-enclosing-ns-name**
+  
+  Change the name of the namespace surrounding point, if any exists.
+- `d`
+
+  **outre-delete-ns-by-name**
+  
+  Delete the namespace definition of a namespace, selected by name.
+- `D`
+
+  **outre-delete-enclosing-ns**
+  
+  Delete the namespace definition surrounding point, if any exists.
 
 [^1]: hopefully non-sacrilegious 

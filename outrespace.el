@@ -3,9 +3,10 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-07-12 08:17:57 dharms>
+;; Modified Time-stamp: <2017-07-17 08:32:09 dharms>
 ;; Modified by: Dan Harms
-;; Keywords: c++ namespace
+;; Keywords: tools c++ namespace
+;; Package-Requires: ((emacs "24.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
+;; `Outrespace' is a collection of utilities to manage c++ namespaces.
 ;;
 
 ;;; Code:
