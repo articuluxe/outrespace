@@ -2,10 +2,11 @@
 ;; Copyright (C) 2016-2017  Dan Harms (dharms)
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
-;; Version: 1.0
-;; Modified Time-stamp: <2017-07-17 08:53:54 dharms>
+;; Version: 0.1
+;; Modified Time-stamp: <2017-07-19 13:27:28 dan.harms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
+;; URL: https://github.com/danrharms/outrespace.git
 ;; Package-Requires: ((emacs "24.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
