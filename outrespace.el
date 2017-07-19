@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-07-19 13:27:28 dan.harms>
+;; Modified Time-stamp: <2017-07-20 21:34:07 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -153,13 +153,13 @@ Store in result `outrespace-list'."
                   (message "no namespace following point")
                   nil))))
       (outrespace--on-namespace-selected ns))))
-        ;; (progn
-        ;;   (setq ns
-        ;;   (goto-char (car (nth 2 ns)))
-        ;;   (set-mark-command nil)
-        ;;   (goto-char (cadr (nth 2 ns)))
-        ;;   (setq deactivate-mark nil)
-        ;;   )
+;; (progn
+;;   (setq ns
+;;   (goto-char (car (nth 2 ns)))
+;;   (set-mark-command nil)
+;;   (goto-char (cadr (nth 2 ns)))
+;;   (setq deactivate-mark nil)
+;;   )
 
 ;;;###autoload
 (defun outrespace-goto-namespace-previous ()
@@ -290,8 +290,8 @@ PARENT contains any enclosing namespaces."
         (setq name-pos (list (1+ (cadr tag-pos)) (1+ (cadr tag-pos))))
         (setq title-trimmed outrespace-anon-name))
       (list (list title-trimmed (if parent
-                            (concat parent "::" title-trimmed)
-                          title-trimmed))
+                                    (concat parent "::" title-trimmed)
+                                  title-trimmed))
             tag-pos name-pos delimiter-pos))))
 
 (defun outrespace--get-full-extant (ns)
@@ -435,36 +435,36 @@ This removes the tags and delimiters, not the content."
               (string-equal name (cadr (outrespace--get-ns-names elt))))
             outrespace-list))
 
-(defun outrespace-ivy-jump-to-ns ()
-  "Jump to a namespace in current buffer, using ivy to select."
+(defun outrespace-jump-to-ns ()
+  "Jump to a namespace in current buffer, selected by name."
   (interactive)
-  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to jump to: ")))
-    (when name
-      (outrespace--jump-to-ns (outrespace--get-ns-by-name name)))))
+  (let ((ns (outrespace--choose-ns-by-name "Namespace to jump to: ")))
+    (when ns
+      (outrespace--jump-to-ns ns))))
 
 (defun outrespace-change-ns-name ()
   "Select a namespace, then change its name."
   (interactive)
   (outrespace-scan-buffer)
-  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to change: ")))
-    (when name
-      (outrespace--change-ns-name (outrespace--get-ns-by-name name)))))
+  (let ((ns (outrespace--choose-ns-by-name "Namespace to change: ")))
+    (when ns
+      (outrespace--change-ns-name ns))))
 
 (defun outrespace-delete-ns-by-name ()
   "Select a namespace, then delete it (though not its content)."
   (interactive)
   (outrespace-scan-buffer)
-  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to delete: ")))
-    (when name
-      (outrespace--delete-ns (outrespace--get-ns-by-name name)))))
+  (let ((ns (outrespace--choose-ns-by-name "Namespace to delete: ")))
+    (when ns
+      (outrespace--delete-ns ns))))
 
 (defun outrespace-highlight-ns-by-name ()
   "Select a namespace, then highlight it."
   (interactive)
   (outrespace-scan-buffer)
-  (let ((name (outrespace--choose-ns-name-with-ivy "Namespace to highlight: ")))
-    (when name
-      (outrespace--highlight-ns (outrespace--get-ns-by-name name)))))
+  (let ((ns (outrespace--choose-ns-by-name "Namespace to highlight: ")))
+    (when ns
+      (outrespace--highlight-ns ns))))
 
 (defun outrespace-print-enclosing-ns-name ()
   "Print the closest namespace surrounding point, if any."
@@ -474,37 +474,42 @@ This removes the tags and delimiters, not the content."
     (when ns
       (message "Namespace: %s" (cadr (outrespace--get-ns-names ns))))))
 
-(defun outrespace--choose-ns-name-with-ivy (&optional prompt)
-  "Use ivy (with prompt PROMPT) to select a namespace in the current buffer."
+(defun outrespace--choose-ns-by-name (&optional prompt)
+  "Select a namespace (with prompt PROMPT) in the current buffer."
   (outrespace-scan-buffer)
   (let ((lst (mapcar
               (lambda(elt)
-                (cadr (outrespace--get-ns-names elt)))
+                (cons
+                 (cadr (outrespace--get-ns-names elt))
+                 elt))
               outrespace-list))
-        name)
-    (unless prompt (setq prompt "Namespace: "))
-    (ivy-read prompt (nreverse lst)
-              :re-builder #'ivy--regex
+        ns)
+    (ivy-read (or prompt "Namespace: ")
+              (nreverse lst)
+              :caller 'outrespace--choose-ns-by-name
+              :action (lambda (x)
+                        (setq ns (cdr x)))
               :sort nil
-              :initial-input nil)))
+              :initial-input nil)
+    ns))
 
 ;; namespace
 (defvar c-basic-offset)
 (defun outrespace-wrap-namespace-region (start end name)
   "Surround the region (START, END) with a namespace NAME."
   (interactive "r\nsEnter the namespace name (leave blank for anonymous): ")
-    (save-excursion
-      (goto-char end) (insert "\n}")
-      (insert-char ?\s c-basic-offset)
-      (insert "// end namespace "
-              (if (zerop (length name))
-                  "anonymous" name)
-              "\n")
-      (goto-char start)
-      (insert "namespace ")
-      (unless (zerop (length name))
-          (insert name " "))
-      (insert "{\n\n")))
+  (save-excursion
+    (goto-char end) (insert "\n}")
+    (insert-char ?\s c-basic-offset)
+    (insert "// end namespace "
+            (if (zerop (length name))
+                "anonymous" name)
+            "\n")
+    (goto-char start)
+    (insert "namespace ")
+    (unless (zerop (length name))
+      (insert name " "))
+    (insert "{\n\n")))
 
 (defun outrespace-define-keys (map)
   "Define in MAP key bindings for `outrespace-mode'."
@@ -512,7 +517,7 @@ This removes the tags and delimiters, not the content."
   (define-key map "\M-n" 'outrespace-goto-namespace-next)
   (define-key map "p" 'outrespace-print-enclosing-ns-name)
   (define-key map "n" 'outrespace-wrap-namespace-region)
-  (define-key map "j" 'outrespace-ivy-jump-to-ns)
+  (define-key map "j" 'outrespace-jump-to-ns)
   (define-key map "c" 'outrespace-change-ns-name)
   (define-key map "C" 'outrespace-change-enclosing-ns-name)
   (define-key map "d" 'outrespace-delete-ns-by-name)
