@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-07-20 21:34:07 dharms>
+;; Modified Time-stamp: <2017-07-21 08:33:24 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -348,6 +348,7 @@ stored in `outrespace-list'."
                (outrespace--collect-namespaces-around-pos pt lst)))
     (car srt)))
 
+;;;###autoload
 (defun outrespace-change-enclosing-ns-name ()
   "Change the name of the enclosing namespace, if one exists."
   (interactive)
@@ -384,6 +385,7 @@ stored in `outrespace-list'."
     (insert new)
     (just-one-space)))
 
+;;;###autoload
 (defun outrespace-delete-enclosing-ns ()
   "Delete the enclosing namespace, if one exists.
 This removes the tags and delimiters, not the content."
@@ -435,6 +437,7 @@ This removes the tags and delimiters, not the content."
               (string-equal name (cadr (outrespace--get-ns-names elt))))
             outrespace-list))
 
+;;;###autoload
 (defun outrespace-jump-to-ns ()
   "Jump to a namespace in current buffer, selected by name."
   (interactive)
@@ -442,6 +445,7 @@ This removes the tags and delimiters, not the content."
     (when ns
       (outrespace--jump-to-ns ns))))
 
+;;;###autoload
 (defun outrespace-change-ns-name ()
   "Select a namespace, then change its name."
   (interactive)
@@ -450,6 +454,7 @@ This removes the tags and delimiters, not the content."
     (when ns
       (outrespace--change-ns-name ns))))
 
+;;;###autoload
 (defun outrespace-delete-ns-by-name ()
   "Select a namespace, then delete it (though not its content)."
   (interactive)
@@ -458,6 +463,7 @@ This removes the tags and delimiters, not the content."
     (when ns
       (outrespace--delete-ns ns))))
 
+;;;###autoload
 (defun outrespace-highlight-ns-by-name ()
   "Select a namespace, then highlight it."
   (interactive)
@@ -466,6 +472,7 @@ This removes the tags and delimiters, not the content."
     (when ns
       (outrespace--highlight-ns ns))))
 
+;;;###autoload
 (defun outrespace-print-enclosing-ns-name ()
   "Print the closest namespace surrounding point, if any."
   (interactive)
@@ -495,6 +502,7 @@ This removes the tags and delimiters, not the content."
 
 ;; namespace
 (defvar c-basic-offset)
+;;;###autoload
 (defun outrespace-wrap-namespace-region (start end name)
   "Surround the region (START, END) with a namespace NAME."
   (interactive "r\nsEnter the namespace name (leave blank for anonymous): ")
