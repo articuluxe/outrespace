@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-07-21 08:33:24 dharms>
+;; Modified Time-stamp: <2017-07-25 08:26:43 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -42,7 +42,7 @@
    "List of namespaces in the current buffer."))
 
 (defcustom outrespace-prefix (kbd "C-c n")
-  "Prefix key for outrespace-mode."
+  "Prefix key for `outrespace-mode'."
   :group 'outrespace
   :type 'vector)
 
@@ -58,12 +58,12 @@
   "Whether to print debugging statistics to the `*Messages*' buffer.")
 
 (defun outrespace-in-comment-or-string ()
-  "Return t if point is within a comment or string."
+  "Return non-nil if point is within a comment or string."
   (or (nth 3 (syntax-ppss))
       (nth 4 (syntax-ppss))))
 
 (defun outrespace-not-in-comment-or-string ()
-  "Return t if point is not within a comment or string."
+  "Return non-nil if point is not within a comment or string."
   (not (outrespace-in-comment-or-string)))
 
 (defun outrespace--move-point-to-ns (ns)
