@@ -49,7 +49,7 @@ An example use-package invocation is:
 `(use-package outrespace
   :after cc-mode
   :config
-  (outrespace-define-prefix global-map))`
+  (outrespace-mode 1))`
 
 ## Keys ##
 Outrespace defines its own keymap; adventurous uses can customize this.  
@@ -58,7 +58,7 @@ Outrespace defines its own keymap; adventurous uses can customize this.
   :after cc-mode
   :config 
   (setq outrespace-prefix-key "\C-cx")
-  (outrespace-define-prefix global-map)
+  (outrespace-mode 1)
   )`
 
 The following sections describe each function present in the outrespace keymap.  So commands would be invoked by first pressing the prefix key, followed by the listed key combination.

@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-08-02 17:18:58 dharms>
+;; Modified Time-stamp: <2017-08-02 17:36:13 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -554,7 +554,7 @@ This removes the tags and delimiters, not the content."
   :lighter " NS"
   :keymap outrespace-prefix-map
   (if outrespace-mode
-      (outrespace-define-keys outrespace-mode-map)
+      (outrespace-define-prefix global-map)
     t))
 
 (provide 'outrespace)
