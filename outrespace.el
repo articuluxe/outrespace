@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-08-02 17:17:00 dharms>
+;; Modified Time-stamp: <2017-08-02 17:18:58 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -42,13 +42,11 @@
 
 (defcustom outrespace-prefix (kbd "C-c n")
   "Prefix key for `outrespace-mode'."
-  :group 'outrespace
   :type 'vector)
 
 (defface outrespace-highlight-face
   '((t :inherit highlight :bold t))
-  "Font lock mode face used to highlight namespace names."
-  :group 'outrespace)
+  "Font lock mode face used to highlight namespace names.")
 
 (defvar outrespace-anon-name "<anon>"
   "A display name for anonymous namespaces.")
