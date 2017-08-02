@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-08-01 22:15:28 dharms>
+;; Modified Time-stamp: <2017-08-01 22:17:30 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -152,13 +152,6 @@ Store in result `outrespace-list'."
                   (message "no namespace following point")
                   nil))))
       (outrespace--on-namespace-selected ns))))
-;; (progn
-;;   (setq ns
-;;   (goto-char (car (nth 2 ns)))
-;;   (set-mark-command nil)
-;;   (goto-char (cadr (nth 2 ns)))
-;;   (setq deactivate-mark nil)
-;;   )
 
 ;;;###autoload
 (defun outrespace-goto-namespace-previous ()
