@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-07-25 08:26:43 dharms>
+;; Modified Time-stamp: <2017-08-01 22:15:28 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -37,8 +37,7 @@
   :prefix "outrespace")
 
 (make-variable-buffer-local
- (defvar outrespace-list
-   '()
+ (defvar outrespace-list nil
    "List of namespaces in the current buffer."))
 
 (defcustom outrespace-prefix (kbd "C-c n")
@@ -89,7 +88,7 @@
   "Scan current buffer for all namespaces."
   (save-excursion
     (widen)
-    (let ((lst '()) beg curr cont parent)
+    (let (lst beg curr cont parent)
       (goto-char (point-min))
       (while (setq beg (outrespace--find-ns-next))
         (setq cont
@@ -217,8 +216,7 @@ cons cells, each of which is of the form: `(tag . pos)', where
 tag is the individual tag, and pos is its position in the input.
 The resultant list may have only one element."
   (let ((pos 0)
-        (res '())
-        next)
+        res next)
     (while (setq next (string-match-p "::" tags pos))
       (setq res (cons
                  (cons (substring tags pos next) pos)
