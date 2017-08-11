@@ -40,7 +40,7 @@
  (defvar outrespace-list nil
    "List of namespaces in the current buffer."))
 
-(defcustom outrespace-prefix (kbd "C-c n")
+(defcustom outrespace-prefix-key (kbd "C-c n")
   "Prefix key for `outrespace-mode'."
   :type 'vector)
 
@@ -528,10 +528,6 @@ This removes the tags and delimiters, not the content."
     (outrespace-define-keys map)
     map)
   "Keymap for `outrespace-mode'.")
-
-(defcustom outrespace-prefix-key
-  "\C-cn"
-  "Prefix key for `outrespace-mode'.")
 
 (defun outrespace-define-prefix (map)
   "Define a prefix keymap MAP for `outrespace-mode'."
