@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-08-02 17:36:13 dharms>
+;; Modified Time-stamp: <2017-08-11 17:08:28 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -36,9 +36,8 @@
   :group 'programming
   :prefix "outrespace")
 
-(make-variable-buffer-local
- (defvar outrespace-list nil
-   "List of namespaces in the current buffer."))
+(defvar-local outrespace-list nil
+   "List of namespaces in the current buffer.")
 
 (defcustom outrespace-prefix-key (kbd "C-c n")
   "Prefix key for `outrespace-mode'."
