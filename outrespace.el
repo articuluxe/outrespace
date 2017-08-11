@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-08-11 17:10:57 dharms>
+;; Modified Time-stamp: <2017-08-11 17:16:41 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/danrharms/outrespace.git
@@ -39,7 +39,7 @@
 (defvar-local outrespace-list nil
    "List of namespaces in the current buffer.")
 
-(defcustom outrespace-prefix-key (kbd "C-c n")
+(defcustom outrespace-prefix-key (kbd "C-c C-`")
   "Prefix key for `outrespace-mode'."
   :type 'vector)
 
