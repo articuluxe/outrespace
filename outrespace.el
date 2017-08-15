@@ -3,10 +3,10 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-08-11 17:16:41 dharms>
+;; Modified Time-stamp: <2017-08-15 17:20:52 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
-;; URL: https://github.com/danrharms/outrespace.git
+;; URL: https://github.com/articuluxe/outrespace.git
 ;; Package-Requires: ((emacs "24.4") (ivy "0.8.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
