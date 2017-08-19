@@ -79,7 +79,9 @@ The following sections describe each function present in the outrespace keymap. 
 
   **outre-ivy-jump-to-ns**
   
-  Jump to a selected namespace by name.
+  Jump to a selected namespace by name.  
+  If ivy is loaded, duplicate namespaces can be selected by their position in the buffer.  
+  Otherwise, the duplicate namespace names will have unique suffixes (such as <1>) appended.  
 - `p`
 
   **outre-print-enclosing-ns-name**

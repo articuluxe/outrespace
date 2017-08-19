@@ -3,11 +3,11 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2017-08-15 17:20:52 dharms>
+;; Modified Time-stamp: <2017-08-18 20:31:36 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/articuluxe/outrespace.git
-;; Package-Requires: ((emacs "24.4") (ivy "0.8.0"))
+;; Package-Requires: ((emacs "24.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@
 
 ;;; Code:
 (require 'subr-x)
-(require 'ivy)
 (require 'seq)
+(require 'ivy nil t)
 
 (defgroup outrespace nil
   "C++ namespace wrangler."
@@ -52,6 +52,11 @@
 
 (defvar outrespace-debug nil
   "Whether to print debugging statistics to the `*Messages*' buffer.")
+
+(defvar outrespace--select-ns-func
+  (if (featurep 'ivy) 'outrespace--select-ns-ivy
+    'outrespace--select-ns-standard)
+  "The function by which to select a namespace by name.")
 
 (defun outrespace-in-comment-or-string ()
   "Return non-nil if point is within a comment or string."
@@ -469,6 +474,40 @@ This removes the tags and delimiters, not the content."
     (when ns
       (message "Namespace: %s" (cadr (outrespace--get-ns-names ns))))))
 
+(defun outrespace--select-ns-ivy (lst prompt)
+  "Select a namespace from LST (with prompt PROMPT), using ivy.
+Duplicate namespace names can be selected based on their position
+in the buffer."
+  (interactive)
+  (let (ns)
+    (ivy-read prompt
+              lst
+              :caller 'outrespace--select-ns-ivy
+              :action (lambda (x)
+                        (setq ns (cdr x)))
+              :sort nil
+              :initial-input nil)
+    ns))
+
+(defun outrespace--select-ns-standard (lst prompt)
+  "Select a namespace from LST (with prompt PROMPT).
+Duplicate namespace names will be represented sequentially by
+suffixes such as <1> or <2>."
+  (interactive)
+  (let ((tbl (make-hash-table :test 'equal))
+        val res fully-qualified-name)
+    (dolist (elt lst)
+      (setq fully-qualified-name (cadr (outrespace--get-ns-names (cdr elt))))
+      (setq val (gethash fully-qualified-name tbl))
+      (if val
+          (progn
+            (setcar elt (format "%s<%d>" fully-qualified-name (1+ val)))
+            (puthash fully-qualified-name (1+ val) tbl))
+        (puthash fully-qualified-name 1 tbl)))
+    (setq res (completing-read prompt lst nil t))
+    (when res
+      (cdr (assoc res lst)))))
+
 (defun outrespace--choose-ns-by-name (&optional prompt)
   "Select a namespace (with prompt PROMPT) in the current buffer."
   (outrespace-scan-buffer)
@@ -477,16 +516,9 @@ This removes the tags and delimiters, not the content."
                 (cons
                  (cadr (outrespace--get-ns-names elt))
                  elt))
-              outrespace-list))
-        ns)
-    (ivy-read (or prompt "Namespace: ")
-              (nreverse lst)
-              :caller 'outrespace--choose-ns-by-name
-              :action (lambda (x)
-                        (setq ns (cdr x)))
-              :sort nil
-              :initial-input nil)
-    ns))
+              outrespace-list)))
+    (funcall outrespace--select-ns-func (nreverse lst)
+             (or prompt "Namespace: "))))
 
 ;; namespace
 (defvar c-basic-offset)
