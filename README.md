@@ -69,12 +69,12 @@ The following sections describe each function present in the outrespace keymap. 
 
   **outre-goto-namespace-previous**
   
-  Navigate forward in the current buffer.
+  Navigate backward in the current buffer.
 - `<alt-n>`
 
   **outre-goto-namespace-next**
   
-  Navigate backward in the current buffer.
+  Navigate forward in the current buffer.
 - `j`
 
   **outre-ivy-jump-to-ns**
@@ -113,11 +113,13 @@ The following sections describe each function present in the outrespace keymap. 
 
   **outre-delete-ns-by-name**
   
-  Delete the namespace definition of a namespace, selected by name.
+  Delete the namespace definition of a namespace, selected by name.  
+  Note that this deletes the namespace title and delimiters, but not any content contained therein.
 - `D`
 
   **outre-delete-enclosing-ns**
   
-  Delete the namespace definition surrounding point, if any exists.
+  Delete the namespace definition surrounding point, if any exists.  
+  Note that this deletes the namespace title and delimiters, but not any content contained therein.
 
 [^1]: hopefully non-sacrilegious 
