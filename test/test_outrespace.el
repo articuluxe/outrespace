@@ -5,7 +5,7 @@
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, March 23, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-07-17 08:58:12 dharms>
+;; Modified Time-stamp: <2017-09-04 07:02:44 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace namespace
 
@@ -23,7 +23,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
+;; Test various outrespace namespace utility functions.
 ;;
 
 ;;; Code:
@@ -47,6 +47,8 @@
     (insert"
 #include <file>
 
+using namespace ignore;
+
 namespace my_namespace {
 
 int decl;
@@ -56,6 +58,30 @@ int decl;
 ")
     (outrespace-scan-buffer)
     (should (eq (seq-length outrespace-list) 1))
+    (setq ns (pop outrespace-list))
+    (should (equal (outrespace--get-ns-names ns)
+                   '("my_namespace" "my_namespace")))
+    ))
+
+(ert-deftest ert-outre-test-parse-ns-no-using ()
+  (with-temp-buffer
+    (c++-mode)
+    (insert "
+#include <file>
+
+using  namespace ignore;
+
+namespace my_namespace
+{
+// comment
+}
+
+")
+    (outrespace-scan-buffer)
+    (should (eq (seq-length outrespace-list) 1))
+    (setq ns (pop outrespace-list))
+    (should (equal (outrespace--get-ns-names ns)
+                   '("my_namespace" "my_namespace")))
     ))
 
 (ert-run-tests-batch-and-exit (car argv))
