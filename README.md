@@ -48,18 +48,19 @@ An example use-package invocation is:
 
 `(use-package outrespace  
   :after cc-mode  
-  :config  
-  (outrespace-mode 1))`
+  :init  
+  (with-eval-after-load 'cc-mode (load-library "outrespace"))  
+  (add-hook 'c++-mode-hook (lambda() (outrespace-mode 1))))`
 
 ## Keys ##
 Outrespace defines its own keymap.  You may want to override the default binding to access it, assuming you are not a masochist.  Readers of this document are users of emacs, so I assume nothing.  For the adventurous, it can look something like this:  
 
 `(use-package outrespace  
   :after cc-mode  
-  :config  
+  :init  
   (setq outrespace-prefix-key "\C-cn")  
-  (outrespace-mode 1)  
-  )`
+  (with-eval-after-load 'cc-mode (load-library "outrespace"))  
+  (add-hook 'c++-mode-hook (lambda() (outrespace-mode 1))))`
 
 The following sections describe each function present in the outrespace keymap.  So commands would be invoked by first pressing the prefix key, followed by the listed key combination.
 
