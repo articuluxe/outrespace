@@ -1,4 +1,4 @@
-EMACS=$(EMACSX) -nw
+EMACS=$(VISUAL) -nw
 ROOT=$(HOME)/.emacs.d
 DEPS=-L `pwd` -L $(ROOT)/plugins -L $(ROOT)/custom -L $(ROOT)/elisp -L $(ROOT)/plugins/swiper
 ELC := $(patsubst %.el,%.elc,$(wildcard *.el))

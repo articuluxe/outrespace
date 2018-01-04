@@ -1,11 +1,11 @@
 #!/bin/sh
-":"; exec "$EMACSX" --quick --script "$0" -- "$@" # -*- mode: emacs-lisp; -*-
+":"; exec "$VISUAL" --quick --script "$0" -- "$@" # -*- mode: emacs-lisp; -*-
 ;;; test_outrespace.el --- test outrespace.el
-;; Copyright (C) 2017  Dan Harms (dharms)
+;; Copyright (C) 2017-2018  Dan Harms (dharms)
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, March 23, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-09-04 07:02:44 dharms>
+;; Modified Time-stamp: <2018-01-03 22:54:48 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace namespace
 
