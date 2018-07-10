@@ -3,7 +3,7 @@
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2018-07-09 13:13:11 dan.harms>
+;; Modified Time-stamp: <2018-07-11 09:30:21 dan.harms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/articuluxe/outrespace.git
@@ -205,9 +205,13 @@ Store in result `outrespace-list'."
   (save-excursion
     (and
      (looking-at "namespace")
-     (progn
+     (save-excursion
        (backward-word)
-       (not (looking-at "using\\s-+"))))))
+       (not (looking-at "using\\s-+")))
+     (save-excursion
+       (forward-sexp 2)                 ;skip over "namespace x ="
+       (not (looking-at "\\s-*=")))
+     )))
 
 (defun outrespace--namespace-nested-p (ns)
   "Return whether the namespace NS is a nested namespace (C++17)."

@@ -5,7 +5,7 @@
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, March 23, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2018-01-03 22:54:48 dharms>
+;; Modified Time-stamp: <2018-07-11 09:31:24 dan.harms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace namespace
 
@@ -54,6 +54,9 @@ namespace my_namespace {
 int decl;
 
 }
+
+namespace ignore_me = ignore;
+namespace ignore_me_also=ignore_me;
 
 ")
     (outrespace-scan-buffer)
