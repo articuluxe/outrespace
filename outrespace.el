@@ -1,9 +1,9 @@
-;;; outrespace.el --- c++ namespace utility functions
-;; Copyright (C) 2016-2018  Dan Harms (dharms)
+;;; outrespace.el --- Some c++ namespace utility functions
+;; Copyright (C) 2016-2019  Dan Harms (dharms)
 ;; Author: Dan Harms <danielrharms@gmail.com>
 ;; Created: Wednesday, June  1, 2016
 ;; Version: 0.1
-;; Modified Time-stamp: <2018-07-11 09:30:21 dan.harms>
+;; Modified Time-stamp: <2019-07-24 10:53:07 dan.harms>
 ;; Modified by: Dan Harms
 ;; Keywords: tools c++ namespace
 ;; URL: https://github.com/articuluxe/outrespace.git
