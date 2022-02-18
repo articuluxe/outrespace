@@ -1,11 +1,11 @@
 #!/bin/sh
 ":"; exec "$VISUAL" --quick --script "$0" -- "$@" # -*- mode: emacs-lisp; -*-
 ;;; test_outre-parse-ns.el --- outrespace namespace test
-;; Copyright (C) 2017-2018  Dan Harms (dharms)
+;; Copyright (C) 2017-2018, 2022  Dan Harms (dharms)
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, June 22, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2018-01-03 22:54:35 dharms>
+;; Modified Time-stamp: <2022-02-18 13:33:34 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: test outrespace
 
@@ -356,7 +356,5 @@ name{ }")
   (outre-test-parse-nested-ns-c++17-helper " namespace     name::nested    {    }   ")
   )
 
-
-(ert-run-tests-batch-and-exit (car argv))
 
 ;;; test_outre-parse-ns.el ends here

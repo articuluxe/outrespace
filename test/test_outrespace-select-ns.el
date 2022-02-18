@@ -1,11 +1,11 @@
 #!/bin/sh
 ":"; exec "$VISUAL" --quick --script "$0" -- "$@" # -*- mode: emacs-lisp; -*-
 ;;; test_outrespace-select-ns.el --- test selecting namespaces
-;; Copyright (C) 2017-2018  Dan Harms (dharms)
+;; Copyright (C) 2017-2018, 2022  Dan Harms (dharms)
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, August 17, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2018-01-03 22:54:47 dharms>
+;; Modified Time-stamp: <2022-02-18 13:33:34 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace namespace
 
@@ -73,7 +73,5 @@ namespace first   { }
         (should (string-equal "first"
                               (car (outrespace--get-ns-names ns))))
         ))))
-
-(ert-run-tests-batch-and-exit (car argv))
 
 ;;; test_outrespace-select-ns.el ends here

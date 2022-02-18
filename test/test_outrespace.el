@@ -1,11 +1,11 @@
 #!/bin/sh
 ":"; exec "$VISUAL" --quick --script "$0" -- "$@" # -*- mode: emacs-lisp; -*-
 ;;; test_outrespace.el --- test outrespace.el
-;; Copyright (C) 2017-2018  Dan Harms (dharms)
+;; Copyright (C) 2017-2018, 2022  Dan Harms (dharms)
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Thursday, March 23, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2018-07-11 09:31:24 dan.harms>
+;; Modified Time-stamp: <2022-02-18 13:33:34 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace namespace
 
@@ -86,7 +86,5 @@ namespace my_namespace
     (should (equal (outrespace--get-ns-names ns)
                    '("my_namespace" "my_namespace")))
     ))
-
-(ert-run-tests-batch-and-exit (car argv))
 
 ;;; test_outrespace.el ends here

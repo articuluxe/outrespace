@@ -1,9 +1,9 @@
 ;;; outrespace-test-common.el --- common test utilities for outrespaace
-;; Copyright (C) 2017  Dan Harms (dharms)
+;; Copyright (C) 2017, 2022  Dan Harms (dharms)
 ;; Author: Dan Harms <enniomore@icloud.com>
 ;; Created: Wednesday, June 21, 2017
 ;; Version: 1.0
-;; Modified Time-stamp: <2017-06-21 08:08:32 dharms>
+;; Modified Time-stamp: <2022-02-18 13:17:49 dharms>
 ;; Modified by: Dan Harms
 ;; Keywords: outrespace test
 
@@ -25,25 +25,17 @@
 ;;
 
 ;;; Code:
-;; transfer dependencies from argv into load-path
-(let ((lst (cdr argv))
-      add elt)
-  (setq argv nil)
-  (while lst
-    (setq elt (car lst))
-    (if add
-        (progn
-          (push elt load-path)
-          (setq add nil))
-      (unless
-          (setq add (string= elt "-L"))
-        (push elt argv)))
-    (setq lst (cdr lst))))
-(push (concat (file-name-directory load-file-name) "/..") load-path)
-(push (file-name-directory load-file-name) load-path)
-
-
 (require 'ert)
+(defvar base-test-dir
+  (file-name-as-directory
+   (file-name-directory load-file-name)))
+(defvar absolute-root-dir
+  (cond ((eq system-type 'windows-nt)
+         (expand-file-name "c:\\Users"))
+        (t "/home"))
+  "An absolute path name near the root of the current host.")
 (setq debug-on-error t)
+
+;; project-specific code begins here
 
 ;;; outrespace-test-common.el ends here
